@@ -13,7 +13,7 @@ main menu which has a button that allows you to play the game. When you start
 playing the game, it's also expected that you'll be able to go back to main
 menu. All these different stages of the game are known as game states.
 
-Handling game states is a very difficult task, specially to newbies to game
+Handling game states is a very difficult task, especially to newbies to game
 programming like myself. Today, I was looking for an efficient way to switch
 back and forth between all available states of my simple game.
 
