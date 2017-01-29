@@ -6,7 +6,7 @@ comments: true
 categories: [game programming]
 ---
 
-_Prequisite_: basic C++ and game programming knowledge
+_Prerequisite_: basic C++ and game programming knowledge
 
 When you start any game, you expect to see a loading screen, followed by the
 main menu which has a button that allows you to play the game. When you start
