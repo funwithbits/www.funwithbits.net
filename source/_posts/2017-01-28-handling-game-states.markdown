@@ -11,7 +11,8 @@ _Prerequisite_: basic C++ and game programming knowledge
 When you start any game, you expect to see a loading screen, followed by the
 main menu which has a button that allows you to play the game. When you start
 playing the game, it's also expected that you'll be able to go back to main
-menu. All these different stages of the game are known as game states.
+menu and possibly pause and resume the game. All these different stages of the
+game are known as game states.
 
 Handling game states is a very difficult task, especially to newbies to game
 programming like myself. Today, I was looking for an efficient way to switch
@@ -82,10 +83,6 @@ public:
         if (!_game_states.empty()) {
             _game_states.back()->on_exit();
             _game_states.pop_back();
-
-            if (!_game_states.empty()) {
-                _game_states.back()->on_enter();
-            }
         }
     }
 
