@@ -15,8 +15,8 @@ TL;DR: Bla bla bla about who I am. In this blog, I'll talk about software
 development techniques, low-level hacks, game development, kernel, among other
 interesting topics I feel it's worth sharing with my readers.
 
-I don't expect people to know me prior to reading my blog because I'm almost a
-fresh blood "getting started". That being said, I'm going to introduce myself.
+I don't expect people to know me prior to reading my blog, so I'm going to
+introduce myself.
 
 I think that my father (unfortunately, he's no longer around us) is the main
 reason behind my interest in computers. When I was about 10 years old, he
