@@ -3,7 +3,7 @@ layout: post
 title: "Handling game states"
 date: 2017-01-28 22:52:39 -0200
 comments: true
-categories: [game programming]
+categories: [cpp, game programming]
 keywords: game, game programming, cpp, c++, data structures
 description: Data structure for handling game states in C++
 ---
