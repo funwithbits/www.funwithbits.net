@@ -3,11 +3,14 @@
 # ----------------------- #
 
 url: http://funwithbits.net
-title: Fun With Bits
+
+title: programmer having fun with bits
+banner_title: Fun With Bits
 subtitle: programming blog covering OS internals, game dev, etc...
 author: Raphael S. Carvalho (a.k.a. utroz)
 simple_search: https://www.google.com/search
-description: hacking,programming,algorithms,game development,file system,kernel
+description: for pragmatic programmers, kernel, game programming, etc
+keywords: hacking,programming,algorithms,game development,file system,kernel
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
