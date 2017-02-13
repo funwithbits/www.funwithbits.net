@@ -73,7 +73,7 @@ Let me explain how future is used in Seastar with a real-use case.
 Let's say that you want to call a function to sleep for 1 second. Usually, you
 would only call a sleep function with 1 as parameter, and then the calling
 thread will sleep for 1 second and continue from when it left off.
-In Seastar, you shouldn't block the the current thread due to performance
+In Seastar, you shouldn't block the current thread due to performance
 reasons, but you can block the task (also known as fiber). So you'd need to
 call a Seastar function which promises to wake up the task after 1 second.
 
