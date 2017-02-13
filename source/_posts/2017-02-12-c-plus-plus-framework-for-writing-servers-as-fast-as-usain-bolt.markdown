@@ -69,7 +69,7 @@ http://docs.seastar-project.org/master/index.html
 it easier the task of writing fully-asynchronous code. And that's done using
 the concept of [futures and promises](https://en.wikipedia.org/wiki/Futures_and_promises).
 
-Let me explain how future is used in Seastar with a real-use case.
+Let me explain how future is used in Seastar with code.
 Let's say that you want to call a function to sleep for 1 second. Usually, you
 would only call a sleep function with 1 as parameter, and then the calling
 thread will sleep for 1 second and continue from when it left off.
