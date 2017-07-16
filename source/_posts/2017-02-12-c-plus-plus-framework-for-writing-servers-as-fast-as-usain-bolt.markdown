@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "C++ framework for writing servers as fast as Usain bolt"
+title: "C++ framework for writing servers which are as fast as Usain bolt"
 date: 2017-02-12 17:45:25 -0200
 comments: true
 categories: [cpp, seastar]
