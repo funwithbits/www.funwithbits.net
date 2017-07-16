@@ -25,14 +25,15 @@ an infinite potion of inspiration that you can drink from.
 People have different tastes, so I was thinking if your favorite genre can
 have the same effect on your life. Classical rock, instrumental rock, etc,
 could work too. But I don't think shitty, noisy pop music will do it.
-I don't think I can find the magic in Beethoven symphonies, Vivaldi's four
-seasons, Paganini's caprices in some other genre. The complexity of the melody,
-the depth, the harmony in those musics are outstanding. I'm having a really
-hard time here to describe it, i.e. how classical music impacts almost every
-single aspect of my life. It helps me boosting my creativity and also keeping
-focused on the most important things, it makes me happy when I'm sad, and also
-the other way around. Yes, the latter is true, have you ever tried listening
-to Chopin and Beethoven's sonatas?
+I actually don't think I can find the same level of magic in Beethoven
+symphonies, Vivaldi's four seasons, Paganini's caprices, etc, in some other
+genre. The complexity of the melody, the depth, the harmony in those musics are
+outstanding. I'm having a really hard time here to describe it, i.e. how
+classical music impacts almost every single aspect of my life. It helps me
+boosting my creativity and also keeping focused on the most important things,
+it makes me happy when I'm sad, and also the other way around. Yes, the
+latter is true, have you ever tried listening to Chopin and Beethoven's
+sonatas?
 
 If you aren't into classical music, I leave here my invitation for your to try
 it out. I will help you get started by leaving some links below to some musics
