@@ -35,7 +35,7 @@ it makes me happy when I'm sad, and also the other way around. Yes, the
 latter is true, have you ever tried listening to Chopin and Beethoven's
 sonatas?
 
-If you aren't into classical music, I leave here my invitation for your to try
+If you aren't into classical music, I leave here my invitation for you to try
 it out. I will help you get started by leaving some links below to some musics
 from the composers I like the most. These are just the tip of the iceberg
 though.
