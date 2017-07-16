@@ -9,7 +9,7 @@ description: power of classical music on creative work.
 ---
 
 There's some magic about classical music that helps me as a programmer.
-Yes, I'm definitely not the best programmer out there, but when I find it hard
+Well, I'm definitely not the best programmer out there, but when I find it hard
 to come up with a creative solution, I listen to classical music over and over
 again.
 I leave my gratitude here for Chopin, Mozart, Dvorak, Paganini, Vivaldi,
