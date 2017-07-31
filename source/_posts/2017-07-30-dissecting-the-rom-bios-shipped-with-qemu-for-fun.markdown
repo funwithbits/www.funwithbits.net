@@ -16,8 +16,7 @@ Check it out here: https://pdos.csail.mit.edu/6.828/2016/schedule.html
 
 After you complete the first lab, you will better understand how hardware
 initialization is done by firmware BIOS, then how bootloader is loaded, and
-in turn the operating system. It's also amazing the holes left in the physical
-address space of the machine for backward compatibility.
+in turn the operating system.
 
 Earlier IBM PCs couldn't address more than 1MB of memory, and only the first
 640k chunk was actually RAM. The 640k-1MB range was reserved for special use,
@@ -38,6 +37,10 @@ The layout is more or less as follow:
 |                  |
 +------------------+  <- 0x00000000
 ```
+
+It gets more complex for 32-bit physical address space. It's also amazing how
+the hardware engineers left holes in the physical address space of the machine
+for backward compatibility.
 
 When computer is turned on, BIOS is mapped at that 64k region reserved to it
 and control is transferred over to it. I want to better understand how QEMU
@@ -103,8 +106,8 @@ is used as a reference for I/O addresses. I'm happy wayback machine allows me
 to access that great website again.
 
 ```
-# PC starts at 0x0FF000  to physical address 0xFE05B. This way BIOS assumes
-# control after power up or system restart:
+# PC starts at 0x0FF000 and jumps to physical address 0xFE05B. This way BIOS
+# assumes control after power up or system restart:
 [f000:fff0]    0xffff0:	ljmp   $0xf000,$0xe05b
 
 # Cleans stack segment register
@@ -149,7 +152,7 @@ to access that great website again.
 # Looks like so. GDT descriptor is now used for addressing memory.
 [f000:d185]    0xfd185:	ljmpl  $0x8,$0xfd18d
 The target architecture is assumed to be i386
-# And registers for data are use its own GDT descriptor:
+# And registers for data will use its own GDT descriptor:
 => 0xfd18d:	mov    $0x10,%eax
 => 0xfd192:	mov    %eax,%ds
 => 0xfd194:	mov    %eax,%es
