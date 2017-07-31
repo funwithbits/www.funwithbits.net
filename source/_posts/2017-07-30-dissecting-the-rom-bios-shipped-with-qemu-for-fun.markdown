@@ -1,0 +1,187 @@
+---
+layout: post
+title: "Dissecting the ROM BIOS shipped with QEMU for fun"
+date: 2017-07-30 22:28:00 -0300
+comments: true
+categories: [operating system, low-level, hardware]
+keywords: operating system, engineering, low-level, hardware, mit, 6.828
+description: dissecting QEMU's seabios to better understand boot process
+---
+
+I'm currently studying OS development with MIT course 6.828 mostly for fun.
+I highly recommend it for everyone wanting to have a better understanding of
+how computer works. It will teach you how an operating system works like xv6
+and you will also build your own OS.
+Check it out here: https://pdos.csail.mit.edu/6.828/2016/schedule.html
+
+After you complete the first lab, you will better understand how hardware
+initialization is done by firmware BIOS, then how bootloader is loaded, and
+in turn the operating system. It's also amazing the holes left in the physical
+address space of the machine for backward compatibility.
+
+Earlier IBM PCs couldn't address more than 1MB of memory, and only the first
+640k chunk was actually RAM. The 640k-1MB range was reserved for special use,
+like mapping devices like VGA display, 16-bit PCI devices, and BIOS ROM.
+
+The layout is more or less as follow:
+```
++------------------+  <- 0x00100000 (1MB)
+|     BIOS ROM     |
++------------------+  <- 0x000F0000 (960KB)
+|  16-bit devices, |
+|  expansion ROMs  |
++------------------+  <- 0x000C0000 (768KB)
+|   VGA Display    |
++------------------+  <- 0x000A0000 (640KB)
+|                  |
+|    Low Memory    |
+|                  |
++------------------+  <- 0x00000000
+```
+
+When computer is turned on, BIOS is mapped at that 64k region reserved to it
+and control is transferred over to it. I want to better understand how QEMU
+emulates that. GDB and strace will be my friends in this journey. The former
+will be used to step through BIOS instructions, and the latter to see what
+QEMU is doing internally, like memory maps and files opened.
+
+## Using strace first
+
+one of the most interesting things in strace output is the following: 
+```
+access("/usr/share/qemu/bios-256k.bin", R_OK) = 0
+open("/usr/share/qemu/bios-256k.bin", O_RDONLY) = 13
+lseek(13, 0, SEEK_END)                  = 262144
+lseek(13, 0, SEEK_SET)                  = 0
+read(13, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 262144) = 262144
+close(13)                               = 0
+```
+
+It's very interesting that file storing BIOS is 256k in size, even though area
+reserved for it is 64k. I suppose that only some part of it is actually mapped.
+There are also some interesting files such as */usr/share/qemu/kvmvapic.bin*
+and */usr/share/qemu/vgabios-stdvga.bin* which are opened and read. They all will
+be used to emulate the layout figure shown above.
+
+QEMU also reports the following through 'info roms':
+```
+fw=genroms/kvmvapic.bin size=0x002400 name="kvmvapic.bin"
+addr=00000000fffc0000 size=0x040000 mem=rom name="bios-256k.bin"
+/rom@etc/acpi/tables size=0x200000 name="etc/acpi/tables"
+/rom@etc/table-loader size=0x001000 name="etc/table-loader"
+/rom@etc/acpi/rsdp size=0x000024 name="etc/acpi/rsdp"
+```
+
+## Actual dissection of BIOS using GDB
+
+GDB can remotely connect to QEMU instance which waits for it, and that's what I
+do here. Let's get started...
+
+QEMU starts executing at physical address 0x000FF000 and in real mode, which
+is at the very top of the area reserved for BIOS. CS and IP registers are
+0xF000 and 0xFFF0, respectively. CS and IP were both used for addressing
+memory because registers were only 16 bits, thus the segmented addressing mode
+which multiples segment by 16 and adds offset. So PC is able to address up to
+1MB of memory. The problem is that different values for segment and offset may
+refer to same physical memory which may easily lead to bugs. That was later
+addressed in protected mode which had bigger registers and MMU at its disposal.
+
+We have a very basic idea of what BIOS will accomplish which is memory check,
+device initialization, and lately find a bootable sector to load into a
+predefined address (0x7C00) for which it will transfer control to.
+The purpose of this article is to go into the very specific details, because we
+already know the higher-level overview.
+
+### Dissecting...
+
+I'll only show the most important instructions because this article would get
+long and boring otherwise. On top of each instruction, there will be a comment
+to explain it and also possibly share something interesting.
+
+http://web.archive.org/web/20040304063834/http://members.iweb.net.au:80/~pstorr/pcbook/book2/ioassign.htm
+is used as a reference for I/O addresses. I'm happy wayback machine allows me
+to access that great website again.
+
+```
+# PC starts at 0x0FF000  to physical address 0xFE05B. This way BIOS assumes
+# control after power up or system restart:
+[f000:fff0]    0xffff0:	ljmp   $0xf000,$0xe05b
+
+# Cleans stack segment register
+[f000:e066]    0xfe066:	xor    %dx,%dx
+[f000:e068]    0xfe068:	mov    %dx,%ss
+# Sets up stack point to 0x7000, meaning stack address is actually 0x7000
+[f000:e06a]    0xfe06a:	mov    $0x7000,%esp
+
+# 0xf3513 is probably an address which is moved to EDX, let's see what BIOS
+# want to achieve with that...
+[f000:e070]    0xfe070:	mov    $0xf3513,%edx
+
+# Interrupt flag is reset
+[f000:d15d]    0xfd15d:	cli
+# So is direction flag:
+[f000:d15e]    0xfd15e:	cld 
+
+# Select register 0xF from CMOS with NMI disabled. The lower order 7 bits are
+# used to select register, and the most significant bit determines whether to
+# disable NMI. Register 0xF is CMOS Shutdown Status.
+[f000:d15f]    0xfd15f:	mov    $0x8f,%eax
+[f000:d165]    0xfd165:	out    %al,$0x70
+# Now we will get CMOS Shutdown Status 
+[f000:d167]    0xfd167:	in     $0x71,%al
+
+# A20 control via System Control Port A. Used to control memory 1MB barrier.
+# Bit 1 (rw): 0: disable A20, 1: enable A20
+[f000:d169]    0xfd169:	in     $0x92,%al
+[f000:d16b]    0xfd16b:	or     $0x2,%al
+[f000:d16d]    0xfd16d:	out    %al,$0x92
+
+# Load Global/Interrupt Descriptor Table Register
+# Sorry I'm tired. I won't go into details of what exactly is stored in tables
+[f000:d16f]    0xfd16f:	lidtw  %cs:0x6af8
+[f000:d175]    0xfd175:	lgdtw  %cs:0x6ab8
+
+# Wow, it looks like protected mode was set up by BIOS. Did I get that right?
+[f000:d17b]    0xfd17b:	mov    %cr0,%eax
+[f000:d17e]    0xfd17e:	or     $0x1,%eax
+[f000:d182]    0xfd182:	mov    %eax,%cr0
+
+# Looks like so. GDT descriptor is now used for addressing memory.
+[f000:d185]    0xfd185:	ljmpl  $0x8,$0xfd18d
+The target architecture is assumed to be i386
+# And registers for data are use its own GDT descriptor:
+=> 0xfd18d:	mov    $0x10,%eax
+=> 0xfd192:	mov    %eax,%ds
+=> 0xfd194:	mov    %eax,%es
+=> 0xfd196:	mov    %eax,%ss
+=> 0xfd198:	mov    %eax,%fs
+=> 0xfd19a:	mov    %eax,%gs
+
+# Now an indirect jump for value we moved to EDX in the beginning
+=> 0xfd19e:	jmp    *%edx
+# Setting up stack frame according to x86 calling convention
+=> 0xf3513:	push   %ebx
+=> 0xf3514:	sub    $0x20,%esp
+
+# Pushing two values as arguments for a function
+# Let use variables for them: A=0xf5b6c and B=0xf430b
+=> 0xf3517:	push   $0xf5b6c
+=> 0xf351c:	push   $0xf430b
+=> 0xf3521:	call   0xf096f
+# Loading address of A into ecx, and value of B into edx
+=> 0xf096f:	lea    0x8(%esp),%ecx
+=> 0xf0973:	mov    0x4(%esp),%edx
+=> 0xf0977:	mov    $0xf5b68,%eax
+# If I understood it correctly, it will now initialize PCI devices...
+
+# and it goes on until bootloader takes over...
+```
+
+I'm really tired now, and the article will also be boring if I keep going.
+I think it's better to stop at this point. As we know, the BIOS will also
+keep initializing things and afterwards will load boot sector into 0x7c00
+and start executing it. I hope you had lots of fun reading this article.
+My main idea is to have people interested in operating system engineering.
+I'll also try to keep posting as I go through the OS course offered by MIT.
+
+Bye for now!
