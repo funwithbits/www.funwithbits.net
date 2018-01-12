@@ -5,6 +5,7 @@ date: 2018-01-09 23:57:48 -0200
 comments: true
 categories: [security, hardware, programming]
 keywords: meltdown, exploit, proof-of-concept, poc, kpti, kaiser, security
+description: programmer's guide to meltdown exploit poc
 ---
 
 Ok, what I want here is to guide you through a Meltdown proof-of-concept that
