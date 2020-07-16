@@ -5,12 +5,12 @@
 url: http://funwithbits.net
 
 title: a programmer having fun with bits
-banner_title: Raphael S. Carvalho's blog
-subtitle: my space on the internet for random thoughts
+banner_title: Fun with Bits
+subtitle: Raphael S. Carvalho's space on the internet for random thoughts
 author: Raphael S. Carvalho (a.k.a. utroz)
 simple_search: https://www.google.com/search
-description: for pragmatic programmers, kernel, game programming, etc
-keywords: hacking,programming,algorithms,game development,file system,kernel
+description: Blog for programmers interested in distributed databases and low-level system details
+keywords: database,distributed database,programming,algorithms,file system,kernel
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
