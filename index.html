@@ -1,1 +1,1454 @@
-My Octopress Page is coming soon &hellip;
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>a programmer having fun with bits</title>
+  <meta name="author" content="Raphael S. Carvalho (a.k.a. utroz)">
+
+    
+
+    <meta name="description" content=" Blog for programmers interested in distributed databases and low-level system details ">
+    
+      <meta name="keywords" content="database,distributed database,programming,algorithms,file system,kernel">
+    
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://funwithbits.net/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="a programmer having fun with bits" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-91853321-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Fun with Bits</a></h1>
+  
+    <h2>Raphael S. Carvalho's space on the internet for random thoughts</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="funwithbits.net">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">homepage</a></li>
+  <li><a href="/blog/archives">archives</a></li>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source">blog's source code</a>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source/source/_posts">all posts in github</a>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/resuming-the-blog-and-shifting-its-focus/">Resuming the Blog and Shifting Its Focus</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2020-07-16T12:39:43-03:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2020</span></span> <span class='time'>12:39 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Hello everybody again,</p>
+
+<p>It&rsquo;s been more than 2 years since I posted on this blog. Lots of things happened in my life since then. I married, had a child, so I am not a computer programmer living in my parents' basement anymore. Today, I am resuming the blog, but I&rsquo;d like to shift its focus to distributed databases, which is what I have been working on over the last few years at ScyllaDB. From time to time, I&rsquo;d like to share system level knowledge like file system internals, etc. As some of you may now, I work mostly with storage and compaction. Scylla uses a log-structured approach for storing its data, meaning the on-disk files are immutable, so compacting them eventually becomes needed to keep the amplification factors like space happy. I will work hard to post interesting content to you in a regular basis.</p>
+
+<p>Stay tuned!</p>
+
+<p>Raphael Carvalho</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/programmers-guide-to-meltdown/">Programmer's Guide to Meltdown</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-01-09T23:57:48-02:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:57 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Ok, what I want here is to guide you through a Meltdown proof-of-concept that
+peeks into kernel data that cpu is supposed to protect. Unfortunately, that
+promise was broken and virtually all intel x86 cpu hosts are vulnerable until
+patched (Linux patchset is available and named <a href="https://lkml.org/lkml/2017/10/31/884">kpti (kernel page table isolation)</a>).</p>
+
+<p>So far, we thought we were protected by cpu mechanisms because when you try
+to load kernel (sensitive) data, cpu triggers an exception which in turn is
+propagated by kernel to application as SIGSEGV, leading to application
+termination, look at this example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>cat /proc/kallsyms <span class="p">|</span> grep banner
+</span><span class='line'>ffffffff81a00060 R linux_proc_banner
+</span><span class='line'><span class="nv">$ </span>cat kernel_address_read.cc
+</span><span class='line'>main<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      char *p <span class="o">=</span> <span class="o">(</span>char*<span class="o">)</span>0xffffffff81a00060<span class="p">;</span> // use address of a kernel symbol containing banner
+</span><span class='line'>  *p <span class="o">=</span> 0<span class="p">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="nv">$ </span>./kernel_address_read
+</span><span class='line'>+++ killed by SIGSEGV <span class="o">(</span>core dumped<span class="o">)</span> +++
+</span><span class='line'>Segmentation fault <span class="o">(</span>core dumped<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So time went by, and we all thought we were safe. Recently it was figured out
+that speculative execution could be exploited to break that promise.
+It basically consists of making the cpu use the value stored in a kernel
+address before the cpu detects the access to kernel data is an invalid
+instruction, but it&rsquo;s not that simple&hellip; look at this example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">number</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">kernel_data</span> <span class="o">+</span> <span class="n">number</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It turns out that cpu may actually perform the addition of value found in kernel
+address and 10, but the result is definitely not returned to the program which
+again terminates with a SIGSEGV.</p>
+
+<p>Now comes the BINGO, EUREKA! moment: A researcher figured out that whichever
+data (in example above kernel_data and byte) used in the instruction
+that procedes the invalid one (*kernel_address) will remain cached in the
+cpu data cache. Yes! CPU doesn&rsquo;t invalidate data cached from an instruction
+which used the result (kernel data) of an invalid one (access to kernel data).</p>
+
+<p>Well, data cache cannot directly be read. But we know that access to data
+cached is much faster than to uncached ones, so what we can do is to use the
+byte read from kernel as an index for an array of size 256 elements, each index
+representing a possible representation of a byte (0..255). For example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That would only work if cache line size is 1, but it&rsquo;s usually 64 for level 1,
+so we need to multiply array size and index by 64.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So if it happens that the instruction that accesses array using byte read from
+kernel is executed before cpu triggers exception for invalid access to kernel,
+it means cpu will bring array[kernel_data_as_index * cache_line_size] to cache.</p>
+
+<p>Now we know that we can iterate through the 256 &ldquo;cache lines&rdquo; in array, and
+we&rsquo;ll know that the one with the fastest access time is the one cached by cpu,
+and the &ldquo;cache line&rdquo; index is actually the byte read from kernel.</p>
+
+<p>For example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Please consider for now that signal handler for sigsegv was set up,</span>
+</span><span class='line'><span class="c1">// and we continue executing from here after invalid access</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">MAX_INTEGER_VALUE</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">time</span> <span class="o">=</span> <span class="n">access_time_to</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">fastest_i_time</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">fastest_i</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">printf</span><span class="p">(</span><span class="s">&quot;byte read from kernel is: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">fastest_i</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It&rsquo;s not hard to understand it. If you think of it, fastest_i is equal to the
+byte stored in kernel_address because program determined array[fastest_i *
+cache_line_size] is cached by cpu and only one place in array was cached
+previously by the instructions that accessed kernel and used its value to
+retrieve a byte from array.</p>
+
+<p>In real life, it&rsquo;s not that simple to implement because you need to clear data
+cache (clflush instruction can be used) before performing the test because you
+want to read more bytes and the data cache shouldn&rsquo;t be polluted for array or
+wrong result is returned.</p>
+
+<p>This is my assembly inline to clear cache line for a specific address:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">))</span>
+</span><span class='line'><span class="kr">inline</span> <span class="kt">void</span> <span class="n">__clflush</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">address</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">asm</span> <span class="n">__volatile__</span> <span class="p">(</span>
+</span><span class='line'>        <span class="s">&quot;mfence         </span><span class="se">\n</span><span class="s">&quot;</span>
+</span><span class='line'>        <span class="s">&quot;clflush 0(%0)  </span><span class="se">\n</span><span class="s">&quot;</span>
+</span><span class='line'>        <span class="o">:</span>
+</span><span class='line'>        <span class="o">:</span> <span class="s">&quot;r&quot;</span> <span class="p">(</span><span class="n">address</span><span class="p">)</span>
+</span><span class='line'>        <span class="o">:</span>            <span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So you&rsquo;ll need to do that for each &ldquo;cache line&rdquo; in the array, the code now
+becomes this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">__clflush</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">MAX_INTEGER_VALUE</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">time</span> <span class="o">=</span> <span class="n">access_time_to</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">fastest_i_time</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">fastest_i</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">printf</span><span class="p">(</span><span class="s">&quot;byte read from kernel is: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">fastest_i</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&rsquo;s not complete code because you&rsquo;ll have to set up signal handler or use
+TSX (Transactional Synchronization Extensions) to mitigate SIGSEGV that occurs
+after the instruction to load kernel address retires (is fully executed).
+Follow example using TSX:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">__clflush</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">_xbegin</span><span class="p">()</span> <span class="o">==</span> <span class="n">_XBEGIN_STARTED</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">_xend</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// do nothing</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">MAX_INTEGER_VALUE</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">time</span> <span class="o">=</span> <span class="n">access_time_to</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">fastest_i_time</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">fastest_i</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">printf</span><span class="p">(</span><span class="s">&quot;byte read from kernel is: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">fastest_i</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There&rsquo;s nothing much you can do with this code that only reads 1 byte from
+kernel space, so I&rsquo;d suggest you to take a look at the code of my own project
+that exploits meltdown to check whether or not system is affected, follow link:
+<a href="https://github.com/raphaelsc/Am-I-affected-by-Meltdown">https://github.com/raphaelsc/Am-I-affected-by-Meltdown</a>
+I&rsquo;d also recommend you to take a look at proof-of-concept of the researchers
+involved: <a href="https://github.com/IAIK/meltdown/">https://github.com/IAIK/meltdown/</a></p>
+
+<p>Cheers!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/">Dissecting the ROM BIOS Shipped With QEMU for Fun</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-07-30T22:28:00-03:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>10:28 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&rsquo;m currently studying OS development with MIT course 6.828 mostly for fun.
+I highly recommend it for everyone wanting to have a better understanding of
+how computer works. It will teach you how an operating system works like xv6
+and you will also build your own OS.
+Check it out here: <a href="https://pdos.csail.mit.edu/6.828/2016/schedule.html">https://pdos.csail.mit.edu/6.828/2016/schedule.html</a></p>
+
+<p>After you complete the first lab, you will better understand how hardware
+initialization is done by firmware BIOS, then how bootloader is loaded, and
+in turn the operating system.</p>
+
+<p>Earlier IBM PCs couldn&rsquo;t address more than 1MB of memory, and only the first
+640k chunk was actually RAM. The 640k-1MB range was reserved for special use,
+like mapping devices like VGA display, 16-bit PCI devices, and BIOS ROM.</p>
+
+<p>The layout is more or less as follow:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>+------------------+  &lt;- 0x00100000 (1MB)
+</span><span class='line'>|     BIOS ROM     |
+</span><span class='line'>+------------------+  &lt;- 0x000F0000 (960KB)
+</span><span class='line'>|  16-bit devices, |
+</span><span class='line'>|  expansion ROMs  |
+</span><span class='line'>+------------------+  &lt;- 0x000C0000 (768KB)
+</span><span class='line'>|   VGA Display    |
+</span><span class='line'>+------------------+  &lt;- 0x000A0000 (640KB)
+</span><span class='line'>|                  |
+</span><span class='line'>|    Low Memory    |
+</span><span class='line'>|                  |
+</span><span class='line'>+------------------+  &lt;- 0x00000000</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It gets more complex for 32-bit physical address space. It&rsquo;s also amazing how
+the hardware engineers left holes in the physical address space of the machine
+for backward compatibility.</p>
+
+<p>When computer is turned on, BIOS is mapped at that 64k region reserved to it
+and control is transferred over to it. I want to better understand how QEMU
+emulates that. GDB and strace will be my friends in this journey. The former
+will be used to step through BIOS instructions, and the latter to see what
+QEMU is doing internally, like memory maps and files opened.</p>
+
+<h2>Using strace first</h2>
+
+<p>one of the most interesting things in strace output is the following:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>access("/usr/share/qemu/bios-256k.bin", R_OK) = 0
+</span><span class='line'>open("/usr/share/qemu/bios-256k.bin", O_RDONLY) = 13
+</span><span class='line'>lseek(13, 0, SEEK_END)                  = 262144
+</span><span class='line'>lseek(13, 0, SEEK_SET)                  = 0
+</span><span class='line'>read(13, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 262144) = 262144
+</span><span class='line'>close(13)                               = 0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It&rsquo;s very interesting that file storing BIOS is 256k in size, even though area
+reserved for it is 64k. I suppose that only some part of it is actually mapped.
+There are also some interesting files such as <em>/usr/share/qemu/kvmvapic.bin</em>
+and <em>/usr/share/qemu/vgabios-stdvga.bin</em> which are opened and read. They all will
+be used to emulate the layout figure shown above.</p>
+
+<p>QEMU also reports the following through &lsquo;info roms&rsquo;:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>fw=genroms/kvmvapic.bin size=0x002400 name="kvmvapic.bin"
+</span><span class='line'>addr=00000000fffc0000 size=0x040000 mem=rom name="bios-256k.bin"
+</span><span class='line'>/rom@etc/acpi/tables size=0x200000 name="etc/acpi/tables"
+</span><span class='line'>/rom@etc/table-loader size=0x001000 name="etc/table-loader"
+</span><span class='line'>/rom@etc/acpi/rsdp size=0x000024 name="etc/acpi/rsdp"</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Actual dissection of BIOS using GDB</h2>
+
+<p>GDB can remotely connect to QEMU instance which waits for it, and that&rsquo;s what I
+do here. Let&rsquo;s get started&hellip;</p>
+
+<p>QEMU starts executing at physical address 0x000FF000 and in real mode, which
+is at the very top of the area reserved for BIOS. CS and IP registers are
+0xF000 and 0xFFF0, respectively. CS and IP were both used for addressing
+memory because registers were only 16 bits, thus the segmented addressing mode
+which multiples segment by 16 and adds offset. So PC is able to address up to
+1MB of memory. The problem is that different values for segment and offset may
+refer to same physical memory which may easily lead to bugs. That was later
+addressed in protected mode which had bigger registers and MMU at its disposal.</p>
+
+<p>We have a very basic idea of what BIOS will accomplish which is memory check,
+device initialization, and lately find a bootable sector to load into a
+predefined address (0x7C00) for which it will transfer control to.
+The purpose of this article is to go into the very specific details, because we
+already know the higher-level overview.</p>
+
+<h3>Dissecting&hellip;</h3>
+
+<p>I&rsquo;ll only show the most important instructions because this article would get
+long and boring otherwise. On top of each instruction, there will be a comment
+to explain it and also possibly share something interesting.</p>
+
+<p><a href="http://web.archive.org/web/20040304063834/http://members.iweb.net.au:80/~pstorr/pcbook/book2/ioassign.htm">http://web.archive.org/web/20040304063834/http://members.iweb.net.au:80/~pstorr/pcbook/book2/ioassign.htm</a>
+is used as a reference for I/O addresses. I&rsquo;m happy wayback machine allows me
+to access that great website again.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># PC starts at 0x0FF000 and jumps to physical address 0xFE05B. This way BIOS
+</span><span class='line'># assumes control after power up or system restart:
+</span><span class='line'>[f000:fff0]    0xffff0:   ljmp   $0xf000,$0xe05b
+</span><span class='line'>
+</span><span class='line'># Cleans stack segment register
+</span><span class='line'>[f000:e066]    0xfe066:   xor    %dx,%dx
+</span><span class='line'>[f000:e068]    0xfe068:   mov    %dx,%ss
+</span><span class='line'># Sets up stack point to 0x7000, meaning stack address is actually 0x7000
+</span><span class='line'>[f000:e06a]    0xfe06a:   mov    $0x7000,%esp
+</span><span class='line'>
+</span><span class='line'># 0xf3513 is probably an address which is moved to EDX, let's see what BIOS
+</span><span class='line'># want to achieve with that...
+</span><span class='line'>[f000:e070]    0xfe070:   mov    $0xf3513,%edx
+</span><span class='line'>
+</span><span class='line'># Interrupt flag is reset
+</span><span class='line'>[f000:d15d]    0xfd15d:   cli
+</span><span class='line'># So is direction flag:
+</span><span class='line'>[f000:d15e]    0xfd15e:   cld 
+</span><span class='line'>
+</span><span class='line'># Select register 0xF from CMOS with NMI disabled. The lower order 7 bits are
+</span><span class='line'># used to select register, and the most significant bit determines whether to
+</span><span class='line'># disable NMI. Register 0xF is CMOS Shutdown Status.
+</span><span class='line'>[f000:d15f]    0xfd15f:   mov    $0x8f,%eax
+</span><span class='line'>[f000:d165]    0xfd165:   out    %al,$0x70
+</span><span class='line'># Now we will get CMOS Shutdown Status 
+</span><span class='line'>[f000:d167]    0xfd167:   in     $0x71,%al
+</span><span class='line'>
+</span><span class='line'># A20 control via System Control Port A. Used to control memory 1MB barrier.
+</span><span class='line'># Bit 1 (rw): 0: disable A20, 1: enable A20
+</span><span class='line'>[f000:d169]    0xfd169:   in     $0x92,%al
+</span><span class='line'>[f000:d16b]    0xfd16b:   or     $0x2,%al
+</span><span class='line'>[f000:d16d]    0xfd16d:   out    %al,$0x92
+</span><span class='line'>
+</span><span class='line'># Load Global/Interrupt Descriptor Table Register
+</span><span class='line'># Sorry I'm tired. I won't go into details of what exactly is stored in tables
+</span><span class='line'>[f000:d16f]    0xfd16f:   lidtw  %cs:0x6af8
+</span><span class='line'>[f000:d175]    0xfd175:   lgdtw  %cs:0x6ab8
+</span><span class='line'>
+</span><span class='line'># Wow, it looks like protected mode was set up by BIOS. Did I get that right?
+</span><span class='line'>[f000:d17b]    0xfd17b:   mov    %cr0,%eax
+</span><span class='line'>[f000:d17e]    0xfd17e:   or     $0x1,%eax
+</span><span class='line'>[f000:d182]    0xfd182:   mov    %eax,%cr0
+</span><span class='line'>
+</span><span class='line'># Looks like so. GDT descriptor is now used for addressing memory.
+</span><span class='line'>[f000:d185]    0xfd185:   ljmpl  $0x8,$0xfd18d
+</span><span class='line'>The target architecture is assumed to be i386
+</span><span class='line'># And registers for data will use its own GDT descriptor:
+</span><span class='line'>=&gt; 0xfd18d:    mov    $0x10,%eax
+</span><span class='line'>=&gt; 0xfd192:    mov    %eax,%ds
+</span><span class='line'>=&gt; 0xfd194:    mov    %eax,%es
+</span><span class='line'>=&gt; 0xfd196:    mov    %eax,%ss
+</span><span class='line'>=&gt; 0xfd198:    mov    %eax,%fs
+</span><span class='line'>=&gt; 0xfd19a:    mov    %eax,%gs
+</span><span class='line'>
+</span><span class='line'># Now an indirect jump for value we moved to EDX in the beginning
+</span><span class='line'>=&gt; 0xfd19e:    jmp    *%edx
+</span><span class='line'># Setting up stack frame according to x86 calling convention
+</span><span class='line'>=&gt; 0xf3513:    push   %ebx
+</span><span class='line'>=&gt; 0xf3514:    sub    $0x20,%esp
+</span><span class='line'>
+</span><span class='line'># Pushing two values as arguments for a function
+</span><span class='line'># Let use variables for them: A=0xf5b6c and B=0xf430b
+</span><span class='line'>=&gt; 0xf3517:    push   $0xf5b6c
+</span><span class='line'>=&gt; 0xf351c:    push   $0xf430b
+</span><span class='line'>=&gt; 0xf3521:    call   0xf096f
+</span><span class='line'># Loading address of A into ecx, and value of B into edx
+</span><span class='line'>=&gt; 0xf096f:    lea    0x8(%esp),%ecx
+</span><span class='line'>=&gt; 0xf0973:    mov    0x4(%esp),%edx
+</span><span class='line'>=&gt; 0xf0977:    mov    $0xf5b68,%eax
+</span><span class='line'># If I understood it correctly, it will now initialize PCI devices...
+</span><span class='line'>
+</span><span class='line'># and it goes on until bootloader takes over...</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&rsquo;m really tired now, and the article will also be boring if I keep going.
+I think it&rsquo;s better to stop at this point. As we know, the BIOS will also
+keep initializing things and afterwards will load boot sector into 0x7c00
+and start executing it. I hope you had lots of fun reading this article.
+My main idea is to have people interested in operating system engineering.
+I&rsquo;ll also try to keep posting as I go through the OS course offered by MIT.</p>
+
+<p>Bye for now!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/programming-and-classical-music/">Programming and Classical Music</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-07-16T00:03:39-03:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>12:03 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>There&rsquo;s some magic about classical music that helps me as a programmer.
+Well, I&rsquo;m definitely not the best programmer out there, so when I find it hard
+to come up with a creative solution, I listen to classical music over and over
+again.
+I leave my gratitude here for Chopin, Mozart, Dvorak, Paganini, Vivaldi,
+Beethoven and so many others composers. I&rsquo;m so grateful for all those pieces
+you guys have left behind.
+When I&rsquo;m going through a creativity crisis, I listen to their songs. I also
+like to listen to them while working. It can be said that we all need to be
+in a good mood to produce quality work. That&rsquo;s another thing that classical
+music plays an important role in my life. Whatever my mood is, I listen to
+classical music because it impacts my mind in a good manner. It&rsquo;s almost like
+an infinite potion of inspiration that you can drink from.</p>
+
+<p>People have different tastes, so I was thinking if your favorite genre can
+have the same effect on your life. Classical rock, instrumental rock, etc,
+could work too. But I don&rsquo;t think shitty, noisy pop music will do it.
+I actually don&rsquo;t think I can find the same level of magic in Beethoven
+symphonies, Vivaldi&rsquo;s four seasons, Paganini&rsquo;s caprices, etc, in some other
+genre. The complexity of the melody, the depth, the harmony in those musics are
+outstanding. I&rsquo;m having a really hard time here to describe it, i.e. how
+classical music impacts almost every single aspect of my life. It helps me
+boosting my creativity and also keeping focused on the most important things,
+it makes me happy when I&rsquo;m sad, and also the other way around. Yes, the
+latter is true, have you ever tried listening to Chopin and Beethoven&rsquo;s
+sonatas?</p>
+
+<p>If you aren&rsquo;t into classical music, I leave here my invitation for you to try
+it out. I will help you get started by leaving some links below to some musics
+from the composers I like the most. These are just the tip of the iceberg
+though.</p>
+
+<p>I&rsquo;ll start with a magical performance by the Brazilian musician Arthur Moreira
+Lima which is considered one of the best Chopin interpreters:
+<a href="http://www.youtube.com/watch?v=QmF2F8YBU3E" title="Click to watch"><img src="http://img.youtube.com/vi/QmF2F8YBU3E/0.jpg" alt="IMAGE ALT TEXT" /></a></p>
+
+<p>Now Beethoven&rsquo;s moonlight sonata played by the brilliant piano player Valentina
+Lisitsa:
+<a href="http://www.youtube.com/watch?v=zucBfXpCA6s" title="Click to watch"><img src="http://img.youtube.com/vi/zucBfXpCA6s/0.jpg" alt="IMAGE ALT TEXT" /></a></p>
+
+<p>I really hope you guys will give classical music a chance. I didn&rsquo;t listen to
+it when I was a teenager. Now I love it, it&rsquo;s my favorite genre by far. Anyone
+out there that share the same feelings? Not necessarily due to classical music,
+but whichever genre you like the most.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/">C++ Framework for Writing Servers Which Are as Fast as Usain Bolt</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-02-12T17:45:25-02:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>5:45 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><em>Prerequisite</em>: C++</p>
+
+<p>What if I tell you that there&rsquo;s a framework out there that allows you to write
+servers that are as fast as the fastest man alive? Let me introduce you to
+<a href="http://www.seastar-project.org/">Seastar</a>.
+It&rsquo;s a framework written in modern C++ that provides its user with a set of
+tools to extract the most from modern hardware.</p>
+
+<p>Look at the chart below which compares Seastar memcached vs stock memcached:
+<img src="http://www.seastar-project.org/img/memcache.png" alt="alt text" /></p>
+
+<p>And it&rsquo;s not only throughput. It has also proven to improve P99 latency
+considerably. Other example of applications that benefit from Seastar are
+<a href="https://github.com/scylladb/scylla/">ScyllaDB</a>, a distributed database
+compatible with Apache Cassandra, and <a href="https://github.com/fastio/pedis/">Pedis</a>,
+a drop-in replacement for Redis.</p>
+
+<h3>What makes Seastar so fast?</h3>
+
+<p>Let&rsquo;s go through some of its features and I expect that you will understand its
+power by the end of the list. Here we go:</p>
+
+<p><strong>1.</strong> One of its most interesting features is the <a href="http://www.seastar-project.org/shared-nothing/">shared-nothing architecture</a>.
+What exactly is that? Basically, there will be only one thread for each core
+(or shard[1] in Seastar terminology) available to the application. And it also
+means that each thread will have its own set of resources (files, memory, etc)
+that will not be shared. By doing that, we eliminate the need to use locks
+because resources are no longer shared by threads.
+Communication between threads must be done explicitly through <a href="http://www.seastar-project.org/message-passing/">message passing</a>,
+or else, we would need some locking mechanism.</p>
+
+<p>[1]: In seastar, a shard is a thread assigned to a CPU core that acts like an
+isolated machine.</p>
+
+<p>A common multi-threaded application usually looks like the left picture because
+you have threads accessing shared resources, whereas a Seastar application will
+look like the right picture because of its shared-nothing design, look:</p>
+
+<p><img src="/images/shared-nothing-pic.png" title="shared-nothing" alt="images"></p>
+
+<p><strong>2.</strong> Each Seastar thread will have its own scheduler for small asynchronous tasks
+(usually stored in <a href="http://en.cppreference.com/w/cpp/utility/functional/function">std::function</a>),
+which is called <em>The Reactor</em>. It&rsquo;s important to keep in mind that all tasks
+should be asynchronous. That&rsquo;s because if a thread blocks (waiting for I/O, for
+example), the reactor will not be able to run other tasks waiting to run.</p>
+
+<p>Let me throw at you another example. What happens if a syscall is called which
+involves blocking the calling thread until the requested resource (for example,
+sys_read) is satisfied? The CPU would sit idle while waiting for I/O. From the
+perspective of a server, it would mean not handling <em>any</em> requests. So when
+you&rsquo;re writing code for Seastar, you must make sure that you only use
+asynchronous API either provided by Linux or Seastar. All I/O in Seastar is
+done through asynchronous mechanisms provided by Linux such as aio.</p>
+
+<p><strong>Seastar API</strong> is very well documented, and it can be found here:
+<a href="http://docs.seastar-project.org/master/index.html">http://docs.seastar-project.org/master/index.html</a></p>
+
+<p><strong>3.</strong> Because of the issue mentioned above, Seastar needs some mechanism to make
+it easier the task of writing fully-asynchronous code. And that&rsquo;s done using
+the concept of <a href="https://en.wikipedia.org/wiki/Futures_and_promises">futures and promises</a>.</p>
+
+<p>Let me explain how future is used in Seastar with code.
+Let&rsquo;s say that you want to call a function to sleep for 1 second. Usually, you
+would only call a sleep function with 1 as parameter, and then the calling
+thread will sleep for 1 second and continue from when it left off.
+In Seastar, you shouldn&rsquo;t block the current thread due to performance
+reasons, but you can block the task (also known as fiber). So you&rsquo;d need to
+call a Seastar function which promises to wake up the task after 1 second.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &quot;core/app-template.hh&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;core/sleep.hh&quot;</span>
+</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">app_template</span> <span class="n">app</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">app</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="p">[]</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Sleeping... &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">flush</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono_literals</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="n">s</span><span class="p">).</span><span class="n">then</span><span class="p">([]</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Done.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>All functions that need to wait for something (like data from disk or network,
+time, etc) return a future type. Those futures can be consumed using
+future::then(), which takes a function that will run when the time has come.
+In the example above, sleep() returns a future type, which will be waited
+using future::then(). So the program above should print &lsquo;Done.&rsquo; after 1 second.
+The chain of functions (also known as continuations) can grow as you want.
+So after the print, the program could sleep again for N seconds, write to a
+file, send a command over the network, whatever you want,
+<strong>all asynchronously</strong>!
+Please take a look <a href="http://www.seastar-project.org/futures-promises/">here</a> to
+know more about futures and promises in Seastar.</p>
+
+<p>The list is getting long, so I&rsquo;ll tell you quickly what else Seastar provides:</p>
+
+<ul>
+<li>DPDK support</li>
+<li>userspace TCP/IP stack</li>
+<li>userspace I/O scheduler for fairness among components in the same thread</li>
+<li>and much more!</li>
+</ul>
+
+
+<h3>Getting started</h3>
+
+<p>First of all, you should fork the project, which can be found <a href="https://github.com/scylladb/seastar">here</a>.
+Take a look at the README file for instructions on how to install deps and
+compile the project.</p>
+
+<p>If you&rsquo;re interested in knowing more about Seastar, I&rsquo;d advise you to read
+<a href="https://github.com/scylladb/seastar/blob/master/doc/tutorial.md">this tutorial</a>
+written by Nadav Har'El and Avi Kivity. If you&rsquo;re willing to delve into some
+Seastar apps, please go to:
+<a href="https://github.com/scylladb/seastar/tree/master/apps">https://github.com/scylladb/seastar/tree/master/apps</a></p>
+
+<p>If you need help, send an e-mail to the project&rsquo;s mailing list:
+<a href="&#x6d;&#97;&#x69;&#108;&#116;&#111;&#58;&#x73;&#101;&#x61;&#x73;&#x74;&#x61;&#114;&#x2d;&#x64;&#x65;&#x76;&#64;&#103;&#111;&#x6f;&#103;&#108;&#x65;&#x67;&#x72;&#x6f;&#x75;&#112;&#115;&#46;&#x63;&#111;&#109;">&#x73;&#101;&#97;&#115;&#116;&#x61;&#x72;&#45;&#x64;&#x65;&#x76;&#64;&#103;&#111;&#111;&#x67;&#108;&#x65;&#x67;&#114;&#x6f;&#117;&#112;&#115;&#x2e;&#99;&#111;&#x6d;</a></p>
+
+<h3>That&rsquo;s it&hellip;</h3>
+
+<p>Seastar is very complex and it&rsquo;s very hard to cover many of its aspects in a
+single article. At least, I hope I succeeded to help people understand what
+Seastar is about and how to get started. I intend to write more articles
+about it in the future covering more real-world examples. For example, how to
+write a simple server.</p>
+
+<p>Thank you for your time and stay tuned!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/handling-game-states/">Handling Game States</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-01-28T22:52:39-02:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>10:52 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><em>Prerequisite</em>: basic C++ and game programming knowledge</p>
+
+<p>When you start any game, you expect to see a loading screen, followed by the
+main menu which has a button that allows you to play the game. When you start
+playing the game, it&rsquo;s also expected that you&rsquo;ll be able to go back to main
+menu and possibly pause and resume the game. All these different stages of the
+game are known as game states.</p>
+
+<p>Handling game states is a very difficult task, especially to newbies to game
+programming like myself. Today, I was looking for an efficient way to switch
+back and forth between all available states of my simple game.</p>
+
+<p>The simplest way to do it would be using a switch statement, as follow:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">enum</span> <span class="n">game_states</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">MENU</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">GAME</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="n">game</span><span class="o">::</span><span class="n">update</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">switch</span><span class="p">(</span><span class="n">_current_game_state</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">case</span> <span class="nl">MENU</span><span class="p">:</span>
+</span><span class='line'>            <span class="c1">// show game options</span>
+</span><span class='line'>            <span class="c1">// update current state to PLAY if user clicks on play button.</span>
+</span><span class='line'>            <span class="p">...</span>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">case</span> <span class="nl">PLAY</span><span class="p">:</span>
+</span><span class='line'>            <span class="p">...</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&rsquo;s indeed very simple, but it would be a nightmare to maintain this code
+when the number of states increases considerably. It turned out that a
+<a href="http://en.wikipedia.org/wiki/Finite-state_machine">Finite State Machine (FSM)</a>
+is exactly what I was looking for. It&rsquo;s said that FSM is an abstract machine
+that can be in exactly one of a finite number of states at any given time.</p>
+
+<p>To implement a state machine that handle different types of game states, I took
+advantage of polymorphism. Each game state will derive from an abstract class
+called game_state; follow its definition:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">game_state</span> <span class="p">{</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">on_enter</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">on_exit</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The first two methods will be used for loading and cleaning the game state,
+respectively. <strong>game_state::update()</strong> will be used for a given state to react
+to user&rsquo;s input and possibly switch to another state. For example, when an user
+clicks on play button, the state machine will switch from menu to play state.</p>
+
+<p>Now our state machine will be able to work with all different types of game
+states in the same way. To make the transition between stages more efficient,
+the machine will work in the same way a stack does. For example, a new state
+will be pushed to the back of container storing the game states. And more
+importantly, the active state is the one that was last pushed to the container.
+That&rsquo;s how my implementation of game state machine turned out:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">game_state_machine</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">game_state</span><span class="o">&gt;&gt;</span> <span class="n">_game_states</span><span class="p">;</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">push</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">game_state</span><span class="o">&gt;</span> <span class="n">state</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">state</span><span class="o">-&gt;</span><span class="n">on_enter</span><span class="p">();</span>
+</span><span class='line'>        <span class="n">_game_states</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">state</span><span class="p">));</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">pop</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">_game_states</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">_game_states</span><span class="p">.</span><span class="n">back</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">on_exit</span><span class="p">();</span>
+</span><span class='line'>            <span class="n">_game_states</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">_game_states</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">_game_states</span><span class="p">.</span><span class="n">back</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">update</span><span class="p">();</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that <strong>game_state_machine::update()</strong> will only call update on behalf of
+the active state, and that&rsquo;s essential for the machine to work as expected.</p>
+
+<p>I showed the implementation of abstract class for game state, but it&rsquo;s also
+important to understand how an actual game state could be implemented by
+deriving from it. Check it out:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">menu</span> <span class="o">:</span> <span class="k">public</span> <span class="n">game_state</span> <span class="p">{</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">on_enter</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// load menu sprites</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">on_exit</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// clean up goes here</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// if user clicked on play button, switch to play state.</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span> <span class="p">...</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="p">...</span>
+</span><span class='line'>            <span class="n">game_state_machine</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&lt;</span><span class="n">play</span><span class="o">&gt;</span><span class="p">());</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Very easy, no?! If we&rsquo;re in play state, and want to go back to menu, all we
+need to do is to call <strong>game_state_machine::pop()</strong>.</p>
+
+<p>This was the most efficient way I found to handle game states in my own game.
+If you know a better way to do it, please leave a comment!</p>
+
+<p><strong>PS</strong>: the comment section only shows up when you click on the blog post&rsquo;s
+title.</p>
+
+<p>See you,</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/hello-world/">Ready to Have Fun With Bits?!</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-01-21T18:07:34-02:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2017</span></span> <span class='time'>6:07 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Hi everyone. I&rsquo;m really glad that I finally launched this blog. Fun With Bits.</p>
+
+<p>Special thanks goes to <a href="http://catonmat.net">Peteris Krumins</a> who shared some
+invaluable insights about blogging.</p>
+
+<p>TL;DR: Bla bla bla about who I am. In this blog, I&rsquo;ll talk about software
+development techniques, low-level hacks, game development, kernel, among other
+interesting topics I feel it&rsquo;s worth sharing with my readers.</p>
+
+<p>I don&rsquo;t expect people to know me prior to reading my blog, so I&rsquo;m going to
+introduce myself.</p>
+
+<p>I think that my father (unfortunately, he&rsquo;s no longer around us) is the main
+reason behind my interest in computers. When I was about 10 years old, he
+taught me how to use commands to interact with MS DOS. I remember the most
+important commands were to edit texts, execute programs, and navigate through
+the file system. I don&rsquo;t know how many times I messed up with the operating
+system, making impossible to boot it. I had a lot of fun doing it though.
+After that, I was able to create my own websites using HTML and CSS. I didn&rsquo;t
+even know what programming actually was at that time. I was just curious and
+wanted to do interesting things with my computer.</p>
+
+<p>I actually started with programming after I got interested in creating my own
+alternative server for a MMORPG called Tibia. Of course, I didn&rsquo;t create the
+server, but the experience made me learn how to host a server, manage my
+website and consequently a database which stored players' data, and also
+how to write scripts using LUA programming language for custom systems,
+like quests and spells.</p>
+
+<p>At that time, I wasn&rsquo;t even thinking of computer science as a career. I was
+just having fun with bits. Pun intended :-)
+But I changed my mind and joined a local university for a computer science
+degree. It helped me a lot because I wanted to be the best programmer among
+my peers. I worked really hard. A friend of mine a.k.a. kov introduced me to
+the open source world. He told me about the job opportunities I could get if
+I started helping relevant open source projects out there. IIRC, Linux kernel
+was the first open source project I contributed to. The change was to slightly
+improve the PID allocation code. I will not lie. It was extremely hard to find
+something to do, but the experience taught me a lot. I was really obsessed
+with kernel. I often found myself whispering the word &lsquo;kernel&rsquo; while showing or
+walking down the streets. I wanted to better understand how computers worked,
+from boot to application initialization.</p>
+
+<p>As I was gaining more experience, I contributed to other projects until I got
+my first job opportunity at an israeli startup called Cloudius Systems.
+It was working on creation of a project called <a href="http://osv.io">OSv</a>. In OSv, I
+worked with file systems. Mostly on improving ZFS support. I&rsquo;m working for the
+same company, but now on creation of a distributed database called
+<a href="http://scylladb.com">ScyllaDB</a>.</p>
+
+<p>I think I&rsquo;m considerably better than myself of 5 years ago, but there&rsquo;s a long
+way to go until I can say I&rsquo;m really good with computers.
+By the time being, I&rsquo;ll keep repeating this ZEN poem to myself:
+“To follow the path, look to the master, follow the master, walk with the
+master, see through the master, become the master.”</p>
+
+<p>I&rsquo;ll do my best to share interesting stuff with all of you.</p>
+
+<p>Stay tuned!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>$ whoami</h1>
+  <p>
+    <img src="https://avatars3.githubusercontent.com/u/1409139?v=3&s=200" alt="me" style="float:right;width:82px;height:82px;">
+  I'm Raphael S. Carvalho, a.k.a. utroz. I'm a computer programmer who loves operating system design and implementation,
+  and recently developed an interest in game programming. Works on <a href="http://www.scylladb.com/">ScyllaDB</a>
+  </p>
+  <p style="font-size:14px">
+    <img src="/images/twitter-16x16.gif" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="https://twitter.com/raphael_scarv">This is my twitter page</a>
+    <br/>
+    <img src="/images/email.png" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="http://raphaelsc.github.io/">Find my mail at my webpage</a>
+  </p>
+    <form style="border:1px solid #ccc;padding:3px;text-align:center;" action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=funwithbits', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true"><p>Subscribe through your email:</p><p><input type="text" style="width:140px" name="email"/></p><input type="hidden" value="funwithbits" name="uri"/><input type="hidden" name="loc" value="en_US"/><input type="submit" value="Subscribe" /><p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p></form>
+  </p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/resuming-the-blog-and-shifting-its-focus/">Resuming the Blog and Shifting Its Focus</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programmers-guide-to-meltdown/">Programmer's Guide to Meltdown</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/">Dissecting the ROM BIOS Shipped With QEMU for Fun</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programming-and-classical-music/">Programming and Classical Music</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/">C++ Framework for Writing Servers Which Are as Fast as Usain Bolt</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/raphaelsc">@raphaelsc</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'raphaelsc',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - Raphael S. Carvalho (a.k.a. utroz) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'funwithbits';
+      
+        
+        var disqus_script = 'count.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

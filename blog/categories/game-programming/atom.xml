@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Game Programming | a programmer having fun with bits]]></title>
+  <link href="http://funwithbits.net/blog/categories/game-programming/atom.xml" rel="self"/>
+  <link href="http://funwithbits.net/"/>
+  <updated>2020-07-16T13:05:24-03:00</updated>
+  <id>http://funwithbits.net/</id>
+  <author>
+    <name><![CDATA[Raphael S. Carvalho (a.k.a. utroz)]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Handling Game States]]></title>
+    <link href="http://funwithbits.net/blog/handling-game-states/"/>
+    <updated>2017-01-28T22:52:39-02:00</updated>
+    <id>http://funwithbits.net/blog/handling-game-states</id>
+    <content type="html"><![CDATA[<p><em>Prerequisite</em>: basic C++ and game programming knowledge</p>
+
+<p>When you start any game, you expect to see a loading screen, followed by the
+main menu which has a button that allows you to play the game. When you start
+playing the game, it&rsquo;s also expected that you&rsquo;ll be able to go back to main
+menu and possibly pause and resume the game. All these different stages of the
+game are known as game states.</p>
+
+<p>Handling game states is a very difficult task, especially to newbies to game
+programming like myself. Today, I was looking for an efficient way to switch
+back and forth between all available states of my simple game.</p>
+
+<p>The simplest way to do it would be using a switch statement, as follow:
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">enum</span> <span class="n">game_states</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">MENU</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">GAME</span><span class="p">,</span>
+</span><span class='line'>    <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kt">void</span> <span class="n">game</span><span class="o">::</span><span class="n">update</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">switch</span><span class="p">(</span><span class="n">_current_game_state</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">case</span> <span class="nl">MENU</span><span class="p">:</span>
+</span><span class='line'>            <span class="c1">// show game options</span>
+</span><span class='line'>            <span class="c1">// update current state to PLAY if user clicks on play button.</span>
+</span><span class='line'>            <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
+</span><span class='line'>            <span class="k">break</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">case</span> <span class="nl">PLAY</span><span class="p">:</span>
+</span><span class='line'>            <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>
+</span><span class='line'><span class="n">That</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">indeed</span> <span class="n">very</span> <span class="n">simple</span><span class="p">,</span> <span class="n">but</span> <span class="n">it</span> <span class="n">would</span> <span class="n">be</span> <span class="n">a</span> <span class="n">nightmare</span> <span class="n">to</span> <span class="n">maintain</span> <span class="k">this</span> <span class="n">code</span>
+</span><span class='line'><span class="n">when</span> <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="n">states</span> <span class="n">increases</span> <span class="n">considerably</span><span class="p">.</span> <span class="n">It</span> <span class="n">turned</span> <span class="n">out</span> <span class="n">that</span> <span class="n">a</span>
+</span><span class='line'><span class="p">[</span><span class="n">Finite</span> <span class="n">State</span> <span class="n">Machine</span> <span class="p">(</span><span class="n">FSM</span><span class="p">)](</span><span class="nl">http</span><span class="p">:</span><span class="c1">//en.wikipedia.org/wiki/Finite-state_machine)</span>
+</span><span class='line'><span class="n">is</span> <span class="n">exactly</span> <span class="n">what</span> <span class="n">I</span> <span class="n">was</span> <span class="n">looking</span> <span class="k">for</span><span class="p">.</span> <span class="n">It</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">said</span> <span class="n">that</span> <span class="n">FSM</span> <span class="n">is</span> <span class="n">an</span> <span class="n">abstract</span> <span class="n">machine</span>
+</span><span class='line'><span class="n">that</span> <span class="n">can</span> <span class="n">be</span> <span class="n">in</span> <span class="n">exactly</span> <span class="n">one</span> <span class="n">of</span> <span class="n">a</span> <span class="n">finite</span> <span class="n">number</span> <span class="n">of</span> <span class="n">states</span> <span class="n">at</span> <span class="n">any</span> <span class="n">given</span> <span class="n">time</span><span class="p">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">To</span> <span class="n">implement</span> <span class="n">a</span> <span class="n">state</span> <span class="n">machine</span> <span class="n">that</span> <span class="n">handle</span> <span class="n">different</span> <span class="n">types</span> <span class="n">of</span> <span class="n">game</span> <span class="n">states</span><span class="p">,</span> <span class="n">I</span> <span class="n">took</span>
+</span><span class='line'><span class="n">advantage</span> <span class="n">of</span> <span class="n">polymorphism</span><span class="p">.</span> <span class="n">Each</span> <span class="n">game</span> <span class="n">state</span> <span class="n">will</span> <span class="n">derive</span> <span class="n">from</span> <span class="n">an</span> <span class="n">abstract</span> <span class="k">class</span>
+</span><span class='line'><span class="nc">called</span> <span class="n">game_state</span><span class="p">;</span> <span class="n">follow</span> <span class="n">its</span> <span class="nl">definition</span><span class="p">:</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">class</span> <span class="nc">game_state</span> <span class="p">{</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">on_enter</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">on_exit</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">virtual</span> <span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>The first two methods will be used for loading and cleaning the game state,
+respectively. <strong>game_state::update()</strong> will be used for a given state to react
+to user&rsquo;s input and possibly switch to another state. For example, when an user
+clicks on play button, the state machine will switch from menu to play state.</p>
+
+<p>Now our state machine will be able to work with all different types of game
+states in the same way. To make the transition between stages more efficient,
+the machine will work in the same way a stack does. For example, a new state
+will be pushed to the back of container storing the game states. And more
+importantly, the active state is the one that was last pushed to the container.
+That&rsquo;s how my implementation of game state machine turned out:</p>
+
+<pre><code class="cpp">class game_state_machine {
+    std::vector&lt;std::unique_ptr&lt;game_state&gt;&gt; _game_states;
+public:
+    void push(std::unique_ptr&lt;game_state&gt; state) {
+        state-&gt;on_enter();
+        _game_states.push_back(std::move(state));
+    }
+
+    void pop() {
+        if (!_game_states.empty()) {
+            _game_states.back()-&gt;on_exit();
+            _game_states.pop_back();
+        }
+    }
+
+    void update() {
+        if(!_game_states.empty()) {
+            _game_states.back()-&gt;update();
+        }
+    }
+};
+</code></pre>
+
+<p>Note that <strong>game_state_machine::update()</strong> will only call update on behalf of
+the active state, and that&rsquo;s essential for the machine to work as expected.</p>
+
+<p>I showed the implementation of abstract class for game state, but it&rsquo;s also
+important to understand how an actual game state could be implemented by
+deriving from it. Check it out:
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="k">class</span> <span class="nc">menu</span> <span class="o">:</span> <span class="k">public</span> <span class="n">game_state</span> <span class="p">{</span>
+</span><span class='line'><span class="k">public</span><span class="o">:</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">on_enter</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// load menu sprites</span>
+</span><span class='line'>        <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="kt">void</span> <span class="n">on_exit</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// clean up goes here</span>
+</span><span class='line'>        <span class="o">&amp;</span><span class="n">hellip</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="kt">void</span> <span class="n">update</span><span class="p">()</span> <span class="k">override</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// if user clicked on play button, switch to play state.</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span> <span class="p">...</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'>        <span class="n">game_state_machine</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">make_unique</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="n">play</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;());</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>Very easy, no?! If we&rsquo;re in play state, and want to go back to menu, all we
+need to do is to call <strong>game_state_machine::pop()</strong>.</p>
+
+<p>This was the most efficient way I found to handle game states in my own game.
+If you know a better way to do it, please leave a comment!</p>
+
+<p><strong>PS</strong>: the comment section only shows up when you click on the blog post&rsquo;s
+title.</p>
+
+<p>See you,</p>
+]]></content>
+  </entry>
+  
+</feed>

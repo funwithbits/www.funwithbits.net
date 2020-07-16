@@ -1,0 +1,340 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Ready to Have Fun With Bits?! - a programmer having fun with bits</title>
+  <meta name="author" content="Raphael S. Carvalho (a.k.a. utroz)">
+
+    
+
+    <meta name="description" content=" Blog for programmers interested in distributed databases and low-level system details ">
+    
+      <meta name="keywords" content="database,distributed database,programming,algorithms,file system,kernel">
+    
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://funwithbits.net/blog/hello-world/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="a programmer having fun with bits" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-91853321-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Fun with Bits</a></h1>
+  
+    <h2>Raphael S. Carvalho's space on the internet for random thoughts</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="funwithbits.net">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">homepage</a></li>
+  <li><a href="/blog/archives">archives</a></li>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source">blog's source code</a>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source/source/_posts">all posts in github</a>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ready to Have Fun With Bits?!</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-01-21T18:07:34-02:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2017</span></span> <span class='time'>6:07 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Hi everyone. I&rsquo;m really glad that I finally launched this blog. Fun With Bits.</p>
+
+<p>Special thanks goes to <a href="http://catonmat.net">Peteris Krumins</a> who shared some
+invaluable insights about blogging.</p>
+
+<p>TL;DR: Bla bla bla about who I am. In this blog, I&rsquo;ll talk about software
+development techniques, low-level hacks, game development, kernel, among other
+interesting topics I feel it&rsquo;s worth sharing with my readers.</p>
+
+<p>I don&rsquo;t expect people to know me prior to reading my blog, so I&rsquo;m going to
+introduce myself.</p>
+
+<p>I think that my father (unfortunately, he&rsquo;s no longer around us) is the main
+reason behind my interest in computers. When I was about 10 years old, he
+taught me how to use commands to interact with MS DOS. I remember the most
+important commands were to edit texts, execute programs, and navigate through
+the file system. I don&rsquo;t know how many times I messed up with the operating
+system, making impossible to boot it. I had a lot of fun doing it though.
+After that, I was able to create my own websites using HTML and CSS. I didn&rsquo;t
+even know what programming actually was at that time. I was just curious and
+wanted to do interesting things with my computer.</p>
+
+<p>I actually started with programming after I got interested in creating my own
+alternative server for a MMORPG called Tibia. Of course, I didn&rsquo;t create the
+server, but the experience made me learn how to host a server, manage my
+website and consequently a database which stored players' data, and also
+how to write scripts using LUA programming language for custom systems,
+like quests and spells.</p>
+
+<p>At that time, I wasn&rsquo;t even thinking of computer science as a career. I was
+just having fun with bits. Pun intended :-)
+But I changed my mind and joined a local university for a computer science
+degree. It helped me a lot because I wanted to be the best programmer among
+my peers. I worked really hard. A friend of mine a.k.a. kov introduced me to
+the open source world. He told me about the job opportunities I could get if
+I started helping relevant open source projects out there. IIRC, Linux kernel
+was the first open source project I contributed to. The change was to slightly
+improve the PID allocation code. I will not lie. It was extremely hard to find
+something to do, but the experience taught me a lot. I was really obsessed
+with kernel. I often found myself whispering the word &lsquo;kernel&rsquo; while showing or
+walking down the streets. I wanted to better understand how computers worked,
+from boot to application initialization.</p>
+
+<p>As I was gaining more experience, I contributed to other projects until I got
+my first job opportunity at an israeli startup called Cloudius Systems.
+It was working on creation of a project called <a href="http://osv.io">OSv</a>. In OSv, I
+worked with file systems. Mostly on improving ZFS support. I&rsquo;m working for the
+same company, but now on creation of a distributed database called
+<a href="http://scylladb.com">ScyllaDB</a>.</p>
+
+<p>I think I&rsquo;m considerably better than myself of 5 years ago, but there&rsquo;s a long
+way to go until I can say I&rsquo;m really good with computers.
+By the time being, I&rsquo;ll keep repeating this ZEN poem to myself:
+“To follow the path, look to the master, follow the master, walk with the
+master, see through the master, become the master.”</p>
+
+<p>I&rsquo;ll do my best to share interesting stuff with all of you.</p>
+
+<p>Stay tuned!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Raphael S. Carvalho (a.k.a. utroz)</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2017-01-21T18:07:34-02:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2017</span></span> <span class='time'>6:07 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://funwithbits.net/blog/hello-world/" data-via="raphael_scarv" data-counturl="http://funwithbits.net/blog/hello-world/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/handling-game-states/" title="Next Post: Handling game states">Handling game states &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>$ whoami</h1>
+  <p>
+    <img src="https://avatars3.githubusercontent.com/u/1409139?v=3&s=200" alt="me" style="float:right;width:82px;height:82px;">
+  I'm Raphael S. Carvalho, a.k.a. utroz. I'm a computer programmer who loves operating system design and implementation,
+  and recently developed an interest in game programming. Works on <a href="http://www.scylladb.com/">ScyllaDB</a>
+  </p>
+  <p style="font-size:14px">
+    <img src="/images/twitter-16x16.gif" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="https://twitter.com/raphael_scarv">This is my twitter page</a>
+    <br/>
+    <img src="/images/email.png" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="http://raphaelsc.github.io/">Find my mail at my webpage</a>
+  </p>
+    <form style="border:1px solid #ccc;padding:3px;text-align:center;" action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=funwithbits', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true"><p>Subscribe through your email:</p><p><input type="text" style="width:140px" name="email"/></p><input type="hidden" value="funwithbits" name="uri"/><input type="hidden" name="loc" value="en_US"/><input type="submit" value="Subscribe" /><p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p></form>
+  </p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/resuming-the-blog-and-shifting-its-focus/">Resuming the Blog and Shifting Its Focus</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programmers-guide-to-meltdown/">Programmer's Guide to Meltdown</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/">Dissecting the ROM BIOS Shipped With QEMU for Fun</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programming-and-classical-music/">Programming and Classical Music</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/">C++ Framework for Writing Servers Which Are as Fast as Usain Bolt</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/raphaelsc">@raphaelsc</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'raphaelsc',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - Raphael S. Carvalho (a.k.a. utroz) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'funwithbits';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://funwithbits.net/blog/hello-world/';
+        var disqus_url = 'http://funwithbits.net/blog/hello-world/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

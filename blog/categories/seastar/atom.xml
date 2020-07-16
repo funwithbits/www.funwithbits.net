@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Seastar | a programmer having fun with bits]]></title>
+  <link href="http://funwithbits.net/blog/categories/seastar/atom.xml" rel="self"/>
+  <link href="http://funwithbits.net/"/>
+  <updated>2020-07-16T13:05:24-03:00</updated>
+  <id>http://funwithbits.net/</id>
+  <author>
+    <name><![CDATA[Raphael S. Carvalho (a.k.a. utroz)]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[C++ Framework for Writing Servers Which Are as Fast as Usain Bolt]]></title>
+    <link href="http://funwithbits.net/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/"/>
+    <updated>2017-02-12T17:45:25-02:00</updated>
+    <id>http://funwithbits.net/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt</id>
+    <content type="html"><![CDATA[<p><em>Prerequisite</em>: C++</p>
+
+<p>What if I tell you that there&rsquo;s a framework out there that allows you to write
+servers that are as fast as the fastest man alive? Let me introduce you to
+<a href="http://www.seastar-project.org/">Seastar</a>.
+It&rsquo;s a framework written in modern C++ that provides its user with a set of
+tools to extract the most from modern hardware.</p>
+
+<p>Look at the chart below which compares Seastar memcached vs stock memcached:
+<img src="http://www.seastar-project.org/img/memcache.png" alt="alt text" /></p>
+
+<p>And it&rsquo;s not only throughput. It has also proven to improve P99 latency
+considerably. Other example of applications that benefit from Seastar are
+<a href="https://github.com/scylladb/scylla/">ScyllaDB</a>, a distributed database
+compatible with Apache Cassandra, and <a href="https://github.com/fastio/pedis/">Pedis</a>,
+a drop-in replacement for Redis.</p>
+
+<h3>What makes Seastar so fast?</h3>
+
+<p>Let&rsquo;s go through some of its features and I expect that you will understand its
+power by the end of the list. Here we go:</p>
+
+<p><strong>1.</strong> One of its most interesting features is the <a href="http://www.seastar-project.org/shared-nothing/">shared-nothing architecture</a>.
+What exactly is that? Basically, there will be only one thread for each core
+(or shard[1] in Seastar terminology) available to the application. And it also
+means that each thread will have its own set of resources (files, memory, etc)
+that will not be shared. By doing that, we eliminate the need to use locks
+because resources are no longer shared by threads.
+Communication between threads must be done explicitly through <a href="http://www.seastar-project.org/message-passing/">message passing</a>,
+or else, we would need some locking mechanism.</p>
+
+<p>[1]: In seastar, a shard is a thread assigned to a CPU core that acts like an
+isolated machine.</p>
+
+<p>A common multi-threaded application usually looks like the left picture because
+you have threads accessing shared resources, whereas a Seastar application will
+look like the right picture because of its shared-nothing design, look:</p>
+
+<p><img src="/images/shared-nothing-pic.png" title="&lsquo;shared-nothing&rsquo; &lsquo;images&rsquo;" ></p>
+
+<p><strong>2.</strong> Each Seastar thread will have its own scheduler for small asynchronous tasks
+(usually stored in <a href="http://en.cppreference.com/w/cpp/utility/functional/function">std::function</a>),
+which is called <em>The Reactor</em>. It&rsquo;s important to keep in mind that all tasks
+should be asynchronous. That&rsquo;s because if a thread blocks (waiting for I/O, for
+example), the reactor will not be able to run other tasks waiting to run.</p>
+
+<p>Let me throw at you another example. What happens if a syscall is called which
+involves blocking the calling thread until the requested resource (for example,
+sys_read) is satisfied? The CPU would sit idle while waiting for I/O. From the
+perspective of a server, it would mean not handling <em>any</em> requests. So when
+you&rsquo;re writing code for Seastar, you must make sure that you only use
+asynchronous API either provided by Linux or Seastar. All I/O in Seastar is
+done through asynchronous mechanisms provided by Linux such as aio.</p>
+
+<p><strong>Seastar API</strong> is very well documented, and it can be found here:
+<a href="http://docs.seastar-project.org/master/index.html">http://docs.seastar-project.org/master/index.html</a></p>
+
+<p><strong>3.</strong> Because of the issue mentioned above, Seastar needs some mechanism to make
+it easier the task of writing fully-asynchronous code. And that&rsquo;s done using
+the concept of <a href="https://en.wikipedia.org/wiki/Futures_and_promises">futures and promises</a>.</p>
+
+<p>Let me explain how future is used in Seastar with code.
+Let&rsquo;s say that you want to call a function to sleep for 1 second. Usually, you
+would only call a sleep function with 1 as parameter, and then the calling
+thread will sleep for 1 second and continue from when it left off.
+In Seastar, you shouldn&rsquo;t block the current thread due to performance
+reasons, but you can block the task (also known as fiber). So you&rsquo;d need to
+call a Seastar function which promises to wake up the task after 1 second.</p>
+
+<pre><code class="cpp">#include "core/app-template.hh"
+#include "core/sleep.hh"
+#include &lt;iostream&gt;
+
+int main(int argc, char** argv) {
+    app_template app;
+    app.run(argc, argv, [] {
+        std::cout &lt;&lt; "Sleeping... " &lt;&lt; std::flush;
+        using namespace std::chrono_literals;
+        return sleep(1s).then([] {
+            std::cout &lt;&lt; "Done.\n";
+        });
+    });
+}
+</code></pre>
+
+<p>All functions that need to wait for something (like data from disk or network,
+time, etc) return a future type. Those futures can be consumed using
+future::then(), which takes a function that will run when the time has come.
+In the example above, sleep() returns a future type, which will be waited
+using future::then(). So the program above should print &lsquo;Done.&rsquo; after 1 second.
+The chain of functions (also known as continuations) can grow as you want.
+So after the print, the program could sleep again for N seconds, write to a
+file, send a command over the network, whatever you want,
+<strong>all asynchronously</strong>!
+Please take a look <a href="http://www.seastar-project.org/futures-promises/">here</a> to
+know more about futures and promises in Seastar.</p>
+
+<p>The list is getting long, so I&rsquo;ll tell you quickly what else Seastar provides:</p>
+
+<ul>
+<li>DPDK support</li>
+<li>userspace TCP/IP stack</li>
+<li>userspace I/O scheduler for fairness among components in the same thread</li>
+<li>and much more!</li>
+</ul>
+
+
+<h3>Getting started</h3>
+
+<p>First of all, you should fork the project, which can be found <a href="https://github.com/scylladb/seastar">here</a>.
+Take a look at the README file for instructions on how to install deps and
+compile the project.</p>
+
+<p>If you&rsquo;re interested in knowing more about Seastar, I&rsquo;d advise you to read
+<a href="https://github.com/scylladb/seastar/blob/master/doc/tutorial.md">this tutorial</a>
+written by Nadav Har'El and Avi Kivity. If you&rsquo;re willing to delve into some
+Seastar apps, please go to:
+<a href="https://github.com/scylladb/seastar/tree/master/apps">https://github.com/scylladb/seastar/tree/master/apps</a></p>
+
+<p>If you need help, send an e-mail to the project&rsquo;s mailing list:
+<a href="&#109;&#97;&#x69;&#108;&#x74;&#111;&#58;&#115;&#101;&#x61;&#115;&#116;&#97;&#114;&#45;&#100;&#x65;&#x76;&#64;&#103;&#x6f;&#x6f;&#x67;&#108;&#101;&#x67;&#114;&#111;&#x75;&#112;&#x73;&#x2e;&#99;&#111;&#109;">&#x73;&#x65;&#97;&#x73;&#x74;&#x61;&#x72;&#x2d;&#100;&#x65;&#118;&#64;&#103;&#x6f;&#111;&#x67;&#x6c;&#101;&#103;&#x72;&#111;&#x75;&#x70;&#115;&#46;&#x63;&#x6f;&#109;</a></p>
+
+<h3>That&rsquo;s it&hellip;</h3>
+
+<p>Seastar is very complex and it&rsquo;s very hard to cover many of its aspects in a
+single article. At least, I hope I succeeded to help people understand what
+Seastar is about and how to get started. I intend to write more articles
+about it in the future covering more real-world examples. For example, how to
+write a simple server.</p>
+
+<p>Thank you for your time and stay tuned!</p>
+]]></content>
+  </entry>
+  
+</feed>

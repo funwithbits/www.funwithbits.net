@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>C++ Framework for Writing Servers Which Are as Fast as Usain Bolt - a programmer having fun with bits</title>
+  <meta name="author" content="Raphael S. Carvalho (a.k.a. utroz)">
+
+    
+
+    <meta name="description" content=" C++ framework for writing high-performance servers on modern hardware ">
+    
+      <meta name="keywords" content="seastar, framework, cpp, shared-nothing, futures, asynchronous, high-performance">
+    
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://funwithbits.net/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="a programmer having fun with bits" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-91853321-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Fun with Bits</a></h1>
+  
+    <h2>Raphael S. Carvalho's space on the internet for random thoughts</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="funwithbits.net">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">homepage</a></li>
+  <li><a href="/blog/archives">archives</a></li>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source">blog's source code</a>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source/source/_posts">all posts in github</a>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">C++ Framework for Writing Servers Which Are as Fast as Usain Bolt</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-02-12T17:45:25-02:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>5:45 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><em>Prerequisite</em>: C++</p>
+
+<p>What if I tell you that there&rsquo;s a framework out there that allows you to write
+servers that are as fast as the fastest man alive? Let me introduce you to
+<a href="http://www.seastar-project.org/">Seastar</a>.
+It&rsquo;s a framework written in modern C++ that provides its user with a set of
+tools to extract the most from modern hardware.</p>
+
+<p>Look at the chart below which compares Seastar memcached vs stock memcached:
+<img src="http://www.seastar-project.org/img/memcache.png" alt="alt text" /></p>
+
+<p>And it&rsquo;s not only throughput. It has also proven to improve P99 latency
+considerably. Other example of applications that benefit from Seastar are
+<a href="https://github.com/scylladb/scylla/">ScyllaDB</a>, a distributed database
+compatible with Apache Cassandra, and <a href="https://github.com/fastio/pedis/">Pedis</a>,
+a drop-in replacement for Redis.</p>
+
+<h3>What makes Seastar so fast?</h3>
+
+<p>Let&rsquo;s go through some of its features and I expect that you will understand its
+power by the end of the list. Here we go:</p>
+
+<p><strong>1.</strong> One of its most interesting features is the <a href="http://www.seastar-project.org/shared-nothing/">shared-nothing architecture</a>.
+What exactly is that? Basically, there will be only one thread for each core
+(or shard[1] in Seastar terminology) available to the application. And it also
+means that each thread will have its own set of resources (files, memory, etc)
+that will not be shared. By doing that, we eliminate the need to use locks
+because resources are no longer shared by threads.
+Communication between threads must be done explicitly through <a href="http://www.seastar-project.org/message-passing/">message passing</a>,
+or else, we would need some locking mechanism.</p>
+
+<p>[1]: In seastar, a shard is a thread assigned to a CPU core that acts like an
+isolated machine.</p>
+
+<p>A common multi-threaded application usually looks like the left picture because
+you have threads accessing shared resources, whereas a Seastar application will
+look like the right picture because of its shared-nothing design, look:</p>
+
+<p><img src="/images/shared-nothing-pic.png" title="shared-nothing" alt="images"></p>
+
+<p><strong>2.</strong> Each Seastar thread will have its own scheduler for small asynchronous tasks
+(usually stored in <a href="http://en.cppreference.com/w/cpp/utility/functional/function">std::function</a>),
+which is called <em>The Reactor</em>. It&rsquo;s important to keep in mind that all tasks
+should be asynchronous. That&rsquo;s because if a thread blocks (waiting for I/O, for
+example), the reactor will not be able to run other tasks waiting to run.</p>
+
+<p>Let me throw at you another example. What happens if a syscall is called which
+involves blocking the calling thread until the requested resource (for example,
+sys_read) is satisfied? The CPU would sit idle while waiting for I/O. From the
+perspective of a server, it would mean not handling <em>any</em> requests. So when
+you&rsquo;re writing code for Seastar, you must make sure that you only use
+asynchronous API either provided by Linux or Seastar. All I/O in Seastar is
+done through asynchronous mechanisms provided by Linux such as aio.</p>
+
+<p><strong>Seastar API</strong> is very well documented, and it can be found here:
+<a href="http://docs.seastar-project.org/master/index.html">http://docs.seastar-project.org/master/index.html</a></p>
+
+<p><strong>3.</strong> Because of the issue mentioned above, Seastar needs some mechanism to make
+it easier the task of writing fully-asynchronous code. And that&rsquo;s done using
+the concept of <a href="https://en.wikipedia.org/wiki/Futures_and_promises">futures and promises</a>.</p>
+
+<p>Let me explain how future is used in Seastar with code.
+Let&rsquo;s say that you want to call a function to sleep for 1 second. Usually, you
+would only call a sleep function with 1 as parameter, and then the calling
+thread will sleep for 1 second and continue from when it left off.
+In Seastar, you shouldn&rsquo;t block the current thread due to performance
+reasons, but you can block the task (also known as fiber). So you&rsquo;d need to
+call a Seastar function which promises to wake up the task after 1 second.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &quot;core/app-template.hh&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;core/sleep.hh&quot;</span>
+</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">app_template</span> <span class="n">app</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">app</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="p">[]</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Sleeping... &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">flush</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="o">::</span><span class="n">chrono_literals</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="n">s</span><span class="p">).</span><span class="n">then</span><span class="p">([]</span> <span class="p">{</span>
+</span><span class='line'>            <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Done.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>All functions that need to wait for something (like data from disk or network,
+time, etc) return a future type. Those futures can be consumed using
+future::then(), which takes a function that will run when the time has come.
+In the example above, sleep() returns a future type, which will be waited
+using future::then(). So the program above should print &lsquo;Done.&rsquo; after 1 second.
+The chain of functions (also known as continuations) can grow as you want.
+So after the print, the program could sleep again for N seconds, write to a
+file, send a command over the network, whatever you want,
+<strong>all asynchronously</strong>!
+Please take a look <a href="http://www.seastar-project.org/futures-promises/">here</a> to
+know more about futures and promises in Seastar.</p>
+
+<p>The list is getting long, so I&rsquo;ll tell you quickly what else Seastar provides:</p>
+
+<ul>
+<li>DPDK support</li>
+<li>userspace TCP/IP stack</li>
+<li>userspace I/O scheduler for fairness among components in the same thread</li>
+<li>and much more!</li>
+</ul>
+
+
+<h3>Getting started</h3>
+
+<p>First of all, you should fork the project, which can be found <a href="https://github.com/scylladb/seastar">here</a>.
+Take a look at the README file for instructions on how to install deps and
+compile the project.</p>
+
+<p>If you&rsquo;re interested in knowing more about Seastar, I&rsquo;d advise you to read
+<a href="https://github.com/scylladb/seastar/blob/master/doc/tutorial.md">this tutorial</a>
+written by Nadav Har'El and Avi Kivity. If you&rsquo;re willing to delve into some
+Seastar apps, please go to:
+<a href="https://github.com/scylladb/seastar/tree/master/apps">https://github.com/scylladb/seastar/tree/master/apps</a></p>
+
+<p>If you need help, send an e-mail to the project&rsquo;s mailing list:
+<a href="&#x6d;&#97;&#x69;&#108;&#116;&#111;&#58;&#x73;&#101;&#x61;&#x73;&#x74;&#x61;&#114;&#x2d;&#x64;&#x65;&#x76;&#64;&#103;&#111;&#x6f;&#103;&#108;&#x65;&#x67;&#x72;&#x6f;&#x75;&#112;&#115;&#46;&#x63;&#111;&#109;">&#x73;&#101;&#97;&#115;&#116;&#x61;&#x72;&#45;&#x64;&#x65;&#x76;&#64;&#103;&#111;&#111;&#x67;&#108;&#x65;&#x67;&#114;&#x6f;&#117;&#112;&#115;&#x2e;&#99;&#111;&#x6d;</a></p>
+
+<h3>That&rsquo;s it&hellip;</h3>
+
+<p>Seastar is very complex and it&rsquo;s very hard to cover many of its aspects in a
+single article. At least, I hope I succeeded to help people understand what
+Seastar is about and how to get started. I intend to write more articles
+about it in the future covering more real-world examples. For example, how to
+write a simple server.</p>
+
+<p>Thank you for your time and stay tuned!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Raphael S. Carvalho (a.k.a. utroz)</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2017-02-12T17:45:25-02:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>5:45 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/cpp/'>cpp</a>, <a class='category' href='/blog/categories/seastar/'>seastar</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://funwithbits.net/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/" data-via="raphael_scarv" data-counturl="http://funwithbits.net/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/handling-game-states/" title="Previous Post: Handling game states">&laquo; Handling game states</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/programming-and-classical-music/" title="Next Post: Programming and classical music">Programming and classical music &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>$ whoami</h1>
+  <p>
+    <img src="https://avatars3.githubusercontent.com/u/1409139?v=3&s=200" alt="me" style="float:right;width:82px;height:82px;">
+  I'm Raphael S. Carvalho, a.k.a. utroz. I'm a computer programmer who loves operating system design and implementation,
+  and recently developed an interest in game programming. Works on <a href="http://www.scylladb.com/">ScyllaDB</a>
+  </p>
+  <p style="font-size:14px">
+    <img src="/images/twitter-16x16.gif" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="https://twitter.com/raphael_scarv">This is my twitter page</a>
+    <br/>
+    <img src="/images/email.png" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="http://raphaelsc.github.io/">Find my mail at my webpage</a>
+  </p>
+    <form style="border:1px solid #ccc;padding:3px;text-align:center;" action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=funwithbits', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true"><p>Subscribe through your email:</p><p><input type="text" style="width:140px" name="email"/></p><input type="hidden" value="funwithbits" name="uri"/><input type="hidden" name="loc" value="en_US"/><input type="submit" value="Subscribe" /><p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p></form>
+  </p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/resuming-the-blog-and-shifting-its-focus/">Resuming the Blog and Shifting Its Focus</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programmers-guide-to-meltdown/">Programmer's Guide to Meltdown</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/">Dissecting the ROM BIOS Shipped With QEMU for Fun</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programming-and-classical-music/">Programming and Classical Music</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/">C++ Framework for Writing Servers Which Are as Fast as Usain Bolt</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/raphaelsc">@raphaelsc</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'raphaelsc',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - Raphael S. Carvalho (a.k.a. utroz) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'funwithbits';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://funwithbits.net/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/';
+        var disqus_url = 'http://funwithbits.net/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

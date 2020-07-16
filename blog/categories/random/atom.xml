@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Random | a programmer having fun with bits]]></title>
+  <link href="http://funwithbits.net/blog/categories/random/atom.xml" rel="self"/>
+  <link href="http://funwithbits.net/"/>
+  <updated>2020-07-16T13:05:24-03:00</updated>
+  <id>http://funwithbits.net/</id>
+  <author>
+    <name><![CDATA[Raphael S. Carvalho (a.k.a. utroz)]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Resuming the Blog and Shifting Its Focus]]></title>
+    <link href="http://funwithbits.net/blog/resuming-the-blog-and-shifting-its-focus/"/>
+    <updated>2020-07-16T12:39:43-03:00</updated>
+    <id>http://funwithbits.net/blog/resuming-the-blog-and-shifting-its-focus</id>
+    <content type="html"><![CDATA[<p>Hello everybody again,</p>
+
+<p>It&rsquo;s been more than 2 years since I posted on this blog. Lots of things happened in my life since then. I married, had a child, so I am not a computer programmer living in my parents' basement anymore. Today, I am resuming the blog, but I&rsquo;d like to shift its focus to distributed databases, which is what I have been working on over the last few years at ScyllaDB. From time to time, I&rsquo;d like to share system level knowledge like file system internals, etc. As some of you may now, I work mostly with storage and compaction. Scylla uses a log-structured approach for storing its data, meaning the on-disk files are immutable, so compacting them eventually becomes needed to keep the amplification factors like space happy. I will work hard to post interesting content to you in a regular basis.</p>
+
+<p>Stay tuned!</p>
+
+<p>Raphael Carvalho</p>
+]]></content>
+  </entry>
+  
+</feed>

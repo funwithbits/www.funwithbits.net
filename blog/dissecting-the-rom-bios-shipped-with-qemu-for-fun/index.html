@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Dissecting the ROM BIOS Shipped With QEMU for Fun - a programmer having fun with bits</title>
+  <meta name="author" content="Raphael S. Carvalho (a.k.a. utroz)">
+
+    
+
+    <meta name="description" content=" dissecting QEMU's seabios to better understand boot process ">
+    
+      <meta name="keywords" content="operating system, engineering, low-level, hardware, mit, 6.828">
+    
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://funwithbits.net/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="a programmer having fun with bits" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-91853321-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Fun with Bits</a></h1>
+  
+    <h2>Raphael S. Carvalho's space on the internet for random thoughts</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="funwithbits.net">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">homepage</a></li>
+  <li><a href="/blog/archives">archives</a></li>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source">blog's source code</a>
+  <li><a href="https://github.com/funwithbits/www.funwithbits.net/tree/source/source/_posts">all posts in github</a>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Dissecting the ROM BIOS Shipped With QEMU for Fun</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-07-30T22:28:00-03:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>10:28 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I&rsquo;m currently studying OS development with MIT course 6.828 mostly for fun.
+I highly recommend it for everyone wanting to have a better understanding of
+how computer works. It will teach you how an operating system works like xv6
+and you will also build your own OS.
+Check it out here: <a href="https://pdos.csail.mit.edu/6.828/2016/schedule.html">https://pdos.csail.mit.edu/6.828/2016/schedule.html</a></p>
+
+<p>After you complete the first lab, you will better understand how hardware
+initialization is done by firmware BIOS, then how bootloader is loaded, and
+in turn the operating system.</p>
+
+<p>Earlier IBM PCs couldn&rsquo;t address more than 1MB of memory, and only the first
+640k chunk was actually RAM. The 640k-1MB range was reserved for special use,
+like mapping devices like VGA display, 16-bit PCI devices, and BIOS ROM.</p>
+
+<p>The layout is more or less as follow:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>+------------------+  &lt;- 0x00100000 (1MB)
+</span><span class='line'>|     BIOS ROM     |
+</span><span class='line'>+------------------+  &lt;- 0x000F0000 (960KB)
+</span><span class='line'>|  16-bit devices, |
+</span><span class='line'>|  expansion ROMs  |
+</span><span class='line'>+------------------+  &lt;- 0x000C0000 (768KB)
+</span><span class='line'>|   VGA Display    |
+</span><span class='line'>+------------------+  &lt;- 0x000A0000 (640KB)
+</span><span class='line'>|                  |
+</span><span class='line'>|    Low Memory    |
+</span><span class='line'>|                  |
+</span><span class='line'>+------------------+  &lt;- 0x00000000</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It gets more complex for 32-bit physical address space. It&rsquo;s also amazing how
+the hardware engineers left holes in the physical address space of the machine
+for backward compatibility.</p>
+
+<p>When computer is turned on, BIOS is mapped at that 64k region reserved to it
+and control is transferred over to it. I want to better understand how QEMU
+emulates that. GDB and strace will be my friends in this journey. The former
+will be used to step through BIOS instructions, and the latter to see what
+QEMU is doing internally, like memory maps and files opened.</p>
+
+<h2>Using strace first</h2>
+
+<p>one of the most interesting things in strace output is the following:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>access("/usr/share/qemu/bios-256k.bin", R_OK) = 0
+</span><span class='line'>open("/usr/share/qemu/bios-256k.bin", O_RDONLY) = 13
+</span><span class='line'>lseek(13, 0, SEEK_END)                  = 262144
+</span><span class='line'>lseek(13, 0, SEEK_SET)                  = 0
+</span><span class='line'>read(13, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 262144) = 262144
+</span><span class='line'>close(13)                               = 0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>It&rsquo;s very interesting that file storing BIOS is 256k in size, even though area
+reserved for it is 64k. I suppose that only some part of it is actually mapped.
+There are also some interesting files such as <em>/usr/share/qemu/kvmvapic.bin</em>
+and <em>/usr/share/qemu/vgabios-stdvga.bin</em> which are opened and read. They all will
+be used to emulate the layout figure shown above.</p>
+
+<p>QEMU also reports the following through &lsquo;info roms&rsquo;:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>fw=genroms/kvmvapic.bin size=0x002400 name="kvmvapic.bin"
+</span><span class='line'>addr=00000000fffc0000 size=0x040000 mem=rom name="bios-256k.bin"
+</span><span class='line'>/rom@etc/acpi/tables size=0x200000 name="etc/acpi/tables"
+</span><span class='line'>/rom@etc/table-loader size=0x001000 name="etc/table-loader"
+</span><span class='line'>/rom@etc/acpi/rsdp size=0x000024 name="etc/acpi/rsdp"</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Actual dissection of BIOS using GDB</h2>
+
+<p>GDB can remotely connect to QEMU instance which waits for it, and that&rsquo;s what I
+do here. Let&rsquo;s get started&hellip;</p>
+
+<p>QEMU starts executing at physical address 0x000FF000 and in real mode, which
+is at the very top of the area reserved for BIOS. CS and IP registers are
+0xF000 and 0xFFF0, respectively. CS and IP were both used for addressing
+memory because registers were only 16 bits, thus the segmented addressing mode
+which multiples segment by 16 and adds offset. So PC is able to address up to
+1MB of memory. The problem is that different values for segment and offset may
+refer to same physical memory which may easily lead to bugs. That was later
+addressed in protected mode which had bigger registers and MMU at its disposal.</p>
+
+<p>We have a very basic idea of what BIOS will accomplish which is memory check,
+device initialization, and lately find a bootable sector to load into a
+predefined address (0x7C00) for which it will transfer control to.
+The purpose of this article is to go into the very specific details, because we
+already know the higher-level overview.</p>
+
+<h3>Dissecting&hellip;</h3>
+
+<p>I&rsquo;ll only show the most important instructions because this article would get
+long and boring otherwise. On top of each instruction, there will be a comment
+to explain it and also possibly share something interesting.</p>
+
+<p><a href="http://web.archive.org/web/20040304063834/http://members.iweb.net.au:80/~pstorr/pcbook/book2/ioassign.htm">http://web.archive.org/web/20040304063834/http://members.iweb.net.au:80/~pstorr/pcbook/book2/ioassign.htm</a>
+is used as a reference for I/O addresses. I&rsquo;m happy wayback machine allows me
+to access that great website again.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># PC starts at 0x0FF000 and jumps to physical address 0xFE05B. This way BIOS
+</span><span class='line'># assumes control after power up or system restart:
+</span><span class='line'>[f000:fff0]    0xffff0:   ljmp   $0xf000,$0xe05b
+</span><span class='line'>
+</span><span class='line'># Cleans stack segment register
+</span><span class='line'>[f000:e066]    0xfe066:   xor    %dx,%dx
+</span><span class='line'>[f000:e068]    0xfe068:   mov    %dx,%ss
+</span><span class='line'># Sets up stack point to 0x7000, meaning stack address is actually 0x7000
+</span><span class='line'>[f000:e06a]    0xfe06a:   mov    $0x7000,%esp
+</span><span class='line'>
+</span><span class='line'># 0xf3513 is probably an address which is moved to EDX, let's see what BIOS
+</span><span class='line'># want to achieve with that...
+</span><span class='line'>[f000:e070]    0xfe070:   mov    $0xf3513,%edx
+</span><span class='line'>
+</span><span class='line'># Interrupt flag is reset
+</span><span class='line'>[f000:d15d]    0xfd15d:   cli
+</span><span class='line'># So is direction flag:
+</span><span class='line'>[f000:d15e]    0xfd15e:   cld 
+</span><span class='line'>
+</span><span class='line'># Select register 0xF from CMOS with NMI disabled. The lower order 7 bits are
+</span><span class='line'># used to select register, and the most significant bit determines whether to
+</span><span class='line'># disable NMI. Register 0xF is CMOS Shutdown Status.
+</span><span class='line'>[f000:d15f]    0xfd15f:   mov    $0x8f,%eax
+</span><span class='line'>[f000:d165]    0xfd165:   out    %al,$0x70
+</span><span class='line'># Now we will get CMOS Shutdown Status 
+</span><span class='line'>[f000:d167]    0xfd167:   in     $0x71,%al
+</span><span class='line'>
+</span><span class='line'># A20 control via System Control Port A. Used to control memory 1MB barrier.
+</span><span class='line'># Bit 1 (rw): 0: disable A20, 1: enable A20
+</span><span class='line'>[f000:d169]    0xfd169:   in     $0x92,%al
+</span><span class='line'>[f000:d16b]    0xfd16b:   or     $0x2,%al
+</span><span class='line'>[f000:d16d]    0xfd16d:   out    %al,$0x92
+</span><span class='line'>
+</span><span class='line'># Load Global/Interrupt Descriptor Table Register
+</span><span class='line'># Sorry I'm tired. I won't go into details of what exactly is stored in tables
+</span><span class='line'>[f000:d16f]    0xfd16f:   lidtw  %cs:0x6af8
+</span><span class='line'>[f000:d175]    0xfd175:   lgdtw  %cs:0x6ab8
+</span><span class='line'>
+</span><span class='line'># Wow, it looks like protected mode was set up by BIOS. Did I get that right?
+</span><span class='line'>[f000:d17b]    0xfd17b:   mov    %cr0,%eax
+</span><span class='line'>[f000:d17e]    0xfd17e:   or     $0x1,%eax
+</span><span class='line'>[f000:d182]    0xfd182:   mov    %eax,%cr0
+</span><span class='line'>
+</span><span class='line'># Looks like so. GDT descriptor is now used for addressing memory.
+</span><span class='line'>[f000:d185]    0xfd185:   ljmpl  $0x8,$0xfd18d
+</span><span class='line'>The target architecture is assumed to be i386
+</span><span class='line'># And registers for data will use its own GDT descriptor:
+</span><span class='line'>=&gt; 0xfd18d:    mov    $0x10,%eax
+</span><span class='line'>=&gt; 0xfd192:    mov    %eax,%ds
+</span><span class='line'>=&gt; 0xfd194:    mov    %eax,%es
+</span><span class='line'>=&gt; 0xfd196:    mov    %eax,%ss
+</span><span class='line'>=&gt; 0xfd198:    mov    %eax,%fs
+</span><span class='line'>=&gt; 0xfd19a:    mov    %eax,%gs
+</span><span class='line'>
+</span><span class='line'># Now an indirect jump for value we moved to EDX in the beginning
+</span><span class='line'>=&gt; 0xfd19e:    jmp    *%edx
+</span><span class='line'># Setting up stack frame according to x86 calling convention
+</span><span class='line'>=&gt; 0xf3513:    push   %ebx
+</span><span class='line'>=&gt; 0xf3514:    sub    $0x20,%esp
+</span><span class='line'>
+</span><span class='line'># Pushing two values as arguments for a function
+</span><span class='line'># Let use variables for them: A=0xf5b6c and B=0xf430b
+</span><span class='line'>=&gt; 0xf3517:    push   $0xf5b6c
+</span><span class='line'>=&gt; 0xf351c:    push   $0xf430b
+</span><span class='line'>=&gt; 0xf3521:    call   0xf096f
+</span><span class='line'># Loading address of A into ecx, and value of B into edx
+</span><span class='line'>=&gt; 0xf096f:    lea    0x8(%esp),%ecx
+</span><span class='line'>=&gt; 0xf0973:    mov    0x4(%esp),%edx
+</span><span class='line'>=&gt; 0xf0977:    mov    $0xf5b68,%eax
+</span><span class='line'># If I understood it correctly, it will now initialize PCI devices...
+</span><span class='line'>
+</span><span class='line'># and it goes on until bootloader takes over...</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&rsquo;m really tired now, and the article will also be boring if I keep going.
+I think it&rsquo;s better to stop at this point. As we know, the BIOS will also
+keep initializing things and afterwards will load boot sector into 0x7c00
+and start executing it. I hope you had lots of fun reading this article.
+My main idea is to have people interested in operating system engineering.
+I&rsquo;ll also try to keep posting as I go through the OS course offered by MIT.</p>
+
+<p>Bye for now!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Raphael S. Carvalho (a.k.a. utroz)</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2017-07-30T22:28:00-03:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>10:28 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/hardware/'>hardware</a>, <a class='category' href='/blog/categories/low-level/'>low-level</a>, <a class='category' href='/blog/categories/operating-system/'>operating system</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://funwithbits.net/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/" data-via="raphael_scarv" data-counturl="http://funwithbits.net/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/programming-and-classical-music/" title="Previous Post: Programming and classical music">&laquo; Programming and classical music</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/programmers-guide-to-meltdown/" title="Next Post: Programmer's guide to meltdown">Programmer's guide to meltdown &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>$ whoami</h1>
+  <p>
+    <img src="https://avatars3.githubusercontent.com/u/1409139?v=3&s=200" alt="me" style="float:right;width:82px;height:82px;">
+  I'm Raphael S. Carvalho, a.k.a. utroz. I'm a computer programmer who loves operating system design and implementation,
+  and recently developed an interest in game programming. Works on <a href="http://www.scylladb.com/">ScyllaDB</a>
+  </p>
+  <p style="font-size:14px">
+    <img src="/images/twitter-16x16.gif" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="https://twitter.com/raphael_scarv">This is my twitter page</a>
+    <br/>
+    <img src="/images/email.png" alt="me" style="float:left;width:20px;height:20px;">
+    &nbsp;<a href="http://raphaelsc.github.io/">Find my mail at my webpage</a>
+  </p>
+    <form style="border:1px solid #ccc;padding:3px;text-align:center;" action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=funwithbits', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true"><p>Subscribe through your email:</p><p><input type="text" style="width:140px" name="email"/></p><input type="hidden" value="funwithbits" name="uri"/><input type="hidden" name="loc" value="en_US"/><input type="submit" value="Subscribe" /><p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p></form>
+  </p>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/resuming-the-blog-and-shifting-its-focus/">Resuming the Blog and Shifting Its Focus</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programmers-guide-to-meltdown/">Programmer's Guide to Meltdown</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/">Dissecting the ROM BIOS Shipped With QEMU for Fun</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/programming-and-classical-music/">Programming and Classical Music</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/c-plus-plus-framework-for-writing-servers-as-fast-as-usain-bolt/">C++ Framework for Writing Servers Which Are as Fast as Usain Bolt</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/raphaelsc">@raphaelsc</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'raphaelsc',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - Raphael S. Carvalho (a.k.a. utroz) -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'funwithbits';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://funwithbits.net/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/';
+        var disqus_url = 'http://funwithbits.net/blog/dissecting-the-rom-bios-shipped-with-qemu-for-fun/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
