@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>http://funwithbits.net/blog/resuming-the-blog-and-shifting-its-focus/</loc>
-<lastmod>2020-07-16T12:39:43-03:00</lastmod>
-</url>
-<url>
 <loc>http://funwithbits.net/blog/programmers-guide-to-meltdown/</loc>
 <lastmod>2018-01-09T23:57:48-02:00</lastmod>
 </url>
@@ -29,10 +25,10 @@
 <lastmod>2017-01-21T18:07:34-02:00</lastmod>
 </url>
 <url>
-<loc>http://funwithbits.net/</loc>
+<loc>http://funwithbits.net/blog/archives/</loc>
 </url>
 <url>
-<loc>http://funwithbits.net/blog/archives/</loc>
+<loc>http://funwithbits.net/</loc>
 </url>
 <url>
 <loc>http://funwithbits.net/blog/categories/cpp/</loc>
@@ -60,8 +56,5 @@
 </url>
 <url>
 <loc>http://funwithbits.net/blog/categories/security/</loc>
-</url>
-<url>
-<loc>http://funwithbits.net/blog/categories/random/</loc>
 </url>
 </urlset>

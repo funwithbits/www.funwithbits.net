@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Seastar | a programmer having fun with bits]]></title>
   <link href="http://funwithbits.net/blog/categories/seastar/atom.xml" rel="self"/>
   <link href="http://funwithbits.net/"/>
-  <updated>2021-01-29T16:06:08-03:00</updated>
+  <updated>2022-04-22T15:23:13-03:00</updated>
   <id>http://funwithbits.net/</id>
   <author>
     <name><![CDATA[Raphael S. Carvalho (a.k.a. utroz)]]></name>
@@ -138,7 +138,7 @@ Seastar apps, please go to:
 <a href="https://github.com/scylladb/seastar/tree/master/apps">https://github.com/scylladb/seastar/tree/master/apps</a></p>
 
 <p>If you need help, send an e-mail to the project&rsquo;s mailing list:
-<a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#58;&#115;&#x65;&#x61;&#x73;&#116;&#x61;&#114;&#x2d;&#x64;&#101;&#x76;&#64;&#103;&#x6f;&#111;&#103;&#x6c;&#x65;&#x67;&#x72;&#111;&#x75;&#112;&#x73;&#x2e;&#99;&#x6f;&#x6d;">&#x73;&#x65;&#x61;&#x73;&#116;&#x61;&#114;&#45;&#100;&#x65;&#x76;&#64;&#x67;&#111;&#111;&#x67;&#x6c;&#101;&#x67;&#114;&#x6f;&#x75;&#x70;&#115;&#46;&#x63;&#x6f;&#x6d;</a></p>
+<a href="&#x6d;&#x61;&#105;&#108;&#116;&#111;&#58;&#115;&#101;&#x61;&#115;&#x74;&#97;&#114;&#x2d;&#100;&#x65;&#118;&#64;&#x67;&#111;&#x6f;&#103;&#108;&#101;&#x67;&#114;&#111;&#x75;&#x70;&#x73;&#46;&#x63;&#x6f;&#109;">&#x73;&#x65;&#x61;&#x73;&#116;&#97;&#114;&#x2d;&#100;&#101;&#118;&#64;&#x67;&#x6f;&#111;&#103;&#x6c;&#101;&#103;&#x72;&#111;&#x75;&#x70;&#x73;&#46;&#x63;&#111;&#x6d;</a></p>
 
 <h3>That&rsquo;s it&hellip;</h3>
 
